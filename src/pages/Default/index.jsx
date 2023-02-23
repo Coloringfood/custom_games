@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import reactLogo from '@/assets/react.svg';
 import './Default.css';
 
 function Default() {
@@ -12,7 +11,7 @@ function Default() {
 					<img src="/vite.svg" className="logo" alt="Vite logo" />
 				</a>
 				<a href="https://reactjs.org" target="_blank" rel="noreferrer">
-					<img src={reactLogo} className="logo react" alt="React logo" />
+					<img src="/react.svg" className="logo react" alt="React logo" />
 				</a>
 			</div>
 			<h1>Vite + React</h1>

@@ -35,9 +35,18 @@ h1 {
   line-height: 1.1;
 }
 
+nav ul {
+  display: inline-block;
+}
 nav li {
   display: inline;
+}
+nav a {
   padding: 20px;
+  border-radius: 10px;
+}
+nav a.active {
+  background-color: rgba(0,0,0,0.4);
 }
 
 button {

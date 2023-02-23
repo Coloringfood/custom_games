@@ -1,42 +1,88 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react-router-dom';
 
-import Test from '@/pages/Test/index.jsx';
+import Login from '@/pages/Login/index.jsx';
 import Default from '@/pages/Default/index.jsx';
 import NotFound from '@/pages/NotFound/index.jsx';
+function About() {
+	return <h2>About</h2>;
+}
+function Users() {
+	return <h2>Users</h2>;
+}
+function Game() {
+	return <h2>Game</h2>;
+}
+
+/**
+ * Creates a secured Route
+ * Take from https://www.robinwieruch.de/react-router-private-routes/
+ *
+ * @param {UserObject} user - represents the logged-in user
+ * @param children - represents the component to render if user is logged in
+ * @returns {*|JSX.Element}
+ * @constructor
+ */
+const SecuredRoute = ({ user, children }) => {
+	if (!user) {
+		return <Navigate to="/login" />;
+	}
+	return children;
+};
+SecuredRoute.propTypes = {
+	user: PropTypes.object,
+	children: PropTypes.object,
+};
 
 const AppRouter = () => {
+	const [user, setUser] = useState(null);
+	console.log('BBBB user: ', user);
+
 	return (
 		<Router>
 			<div>
 				<nav>
 					<ul>
 						<li>
-							<Link to="/">Root</Link>
+							<NavLink to="/home">Home</NavLink>
 						</li>
 						<li>
-							<Link to="/home">Home</Link>
+							<NavLink to="/about">About</NavLink>
 						</li>
+						{user && [
+							<li key={'Secured_profile'}>
+								<NavLink to="/profile">Profile</NavLink>
+							</li>,
+							<li key={'Secured_game'}>
+								<NavLink to="/game">Game</NavLink>
+							</li>,
+						]}
 						<li>
-							<Link to="/about">About</Link>
-						</li>
-						<li>
-							<Link to="/users">Users</Link>
-						</li>
-						<li>
-							<Link to="/login">Login</Link>
-						</li>
-						<li>
-							<Link to="/ASDF">Broken</Link>
+							<NavLink to="/login">{user ? 'Sign In' : 'Sign Out'}</NavLink>
 						</li>
 					</ul>
 				</nav>
 				<Routes>
 					<Route path="/home" element={<Default />} />
 					<Route path="/about" element={<About />} />
-					<Route path="/users" element={<Users />} />
-					<Route path="/login" element={<Test />} />
+					<Route
+						path="/profile"
+						component={
+							<SecuredRoute user={user}>
+								<Users />
+							</SecuredRoute>
+						}
+					/>
+					<Route
+						path="/profile"
+						component={
+							<SecuredRoute user={user}>
+								<Game />
+							</SecuredRoute>
+						}
+					/>
+					<Route path="/login" element={<Login setActiveUser={setUser} />} />
 
 					<Route path={'/'} element={<Navigate to={'/home'} />} />
 					<Route path="*" element={<NotFound />} />
@@ -51,11 +97,3 @@ AppRouter.propTypes = {
 };
 
 export default AppRouter;
-
-function About() {
-	return <h2>About</h2>;
-}
-
-function Users() {
-	return <h2>Users</h2>;
-}

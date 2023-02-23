@@ -1,0 +1,10 @@
+#Login {
+    text-align: left;
+}
+label {
+    display: block;
+    margin: 10px;
+}
+label input {
+    margin-left: 10px;
+}
