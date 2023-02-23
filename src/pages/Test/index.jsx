@@ -1,7 +1,8 @@
 import React from 'react';
 
-const Test = () => {
-	return <div>TEST</div>;
-};
+function Test(props) {
+	console.log('BBBB props: ', props);
+	return <h1>TEST Login Page</h1>;
+}
 
 export default Test;
