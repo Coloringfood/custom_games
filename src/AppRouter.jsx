@@ -5,14 +5,12 @@ import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react
 import Login from '@/pages/Login/index.jsx';
 import Default from '@/pages/Default/index.jsx';
 import NotFound from '@/pages/NotFound/index.jsx';
+import Game from '@/pages/Game/index.jsx';
 function About() {
 	return <h2>About</h2>;
 }
 function Users() {
 	return <h2>Users</h2>;
-}
-function Game() {
-	return <h2>Game</h2>;
 }
 
 /**
@@ -37,7 +35,6 @@ SecuredRoute.propTypes = {
 
 const AppRouter = () => {
 	const [user, setUser] = useState(null);
-	console.log('BBBB user: ', user);
 
 	return (
 		<Router>
@@ -51,15 +48,15 @@ const AppRouter = () => {
 							<NavLink to="/about">About</NavLink>
 						</li>
 						{user && [
-							<li key={'Secured_profile'}>
-								<NavLink to="/profile">Profile</NavLink>
-							</li>,
 							<li key={'Secured_game'}>
 								<NavLink to="/game">Game</NavLink>
 							</li>,
+							<li key={'Secured_profile'}>
+								<NavLink to="/profile">Hello {user.username}</NavLink>
+							</li>,
 						]}
 						<li>
-							<NavLink to="/login">{user ? 'Sign In' : 'Sign Out'}</NavLink>
+							<NavLink to="/login">{user ? 'Sign Out' : 'Sign In'}</NavLink>
 						</li>
 					</ul>
 				</nav>
@@ -68,17 +65,17 @@ const AppRouter = () => {
 					<Route path="/about" element={<About />} />
 					<Route
 						path="/profile"
-						component={
+						element={
 							<SecuredRoute user={user}>
 								<Users />
 							</SecuredRoute>
 						}
 					/>
 					<Route
-						path="/profile"
-						component={
+						path="/game"
+						element={
 							<SecuredRoute user={user}>
-								<Game />
+								<Game user={user} />
 							</SecuredRoute>
 						}
 					/>

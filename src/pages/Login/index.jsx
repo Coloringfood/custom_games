@@ -10,12 +10,10 @@ import './Login.css';
  * @property {string} name - users display name
  */
 const Login = ({ setActiveUser }) => {
-	console.log('BBBB ----------------------------------------');
 	const navigate = useNavigate();
 	const [loginData, setLoginData] = useState({});
 
 	useEffect(() => {
-		console.log('BBBB Clearing user');
 		setActiveUser(null);
 	}, []);
 	const handleSubmit = () => {

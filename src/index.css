@@ -12,6 +12,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  --board-game-height: 1000px;
+  --board-game-width: 700px;
+  --player-board-height: 200px;
+  --player-board-width: 500px;
 }
 
 a {

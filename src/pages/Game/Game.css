@@ -1,0 +1,58 @@
+#GameGrid {
+    width: var(--board-game-height);
+    height: var(--board-game-width);
+    background-color: aliceblue;
+    position: relative;
+}
+
+.player_board {
+    user-select: none;
+    border-radius: 5px;
+    position: absolute;
+    width: var(--player-board-width);
+    height: var(--player-board-height);
+    color: rgba(0,0,0,0.8);
+    border: 1px solid black;
+    transition: top 2s, left 2s, right 2s, transform 2s;
+}
+.player_0{
+    background-color: rgba(255,0,0,.1);
+}
+.player_1{
+    background-color: rgba(0,255,0,.1);
+}
+.player_2{
+    background-color: rgba(0,0,255,.1);
+}
+.player_3{
+    background-color: rgba(255,0,255,.1);
+}
+
+.board_0 {
+    transform: rotate(0deg);
+    top: calc(100% - var(--player-board-height));
+    left: calc(50% - 250px);
+}
+
+.board_1 {
+    transform: rotate(90deg);
+    top: calc(50% - (var(--player-board-height) / 2));
+    left: -150px;
+}
+
+.board_2 {
+    transform: rotate(180deg);
+    top: 0;
+    left: calc(50% - (var(--player-board-width) / 2));
+}
+
+.board_3 {
+    transform: rotate(270deg);
+    top: calc(50% - (var(--player-board-height) / 2));
+    left: calc(var(--board-game-width) - 50px);
+}
+
+.board_3.stopped {
+    transition: transform 0s;
+    transform: rotate(-90deg);
+}
