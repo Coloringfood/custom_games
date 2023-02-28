@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react
 import Login from '@/pages/Login/index.jsx';
 import Default from '@/pages/Default/index.jsx';
 import NotFound from '@/pages/NotFound/index.jsx';
-import Game from '@/pages/Game/index.jsx';
+import Game from '@/pages/GameBoardDemo/index.jsx';
 function About() {
 	return <h2>About</h2>;
 }
