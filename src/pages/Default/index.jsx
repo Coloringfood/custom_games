@@ -14,6 +14,13 @@ function Default() {
 					<li>Seven Dragons</li>
 					<li>Potion Explosion</li>
 					<li>Gizmos</li>
+					<li>
+						Card Games
+						<ul>
+							<li>5 Crowns</li>
+							<li>The great Dalmuti</li>
+						</ul>
+					</li>
 				</ul>
 			</p>
 			<p id="honors">Today&apos;s server is brought to you by the following:</p>
