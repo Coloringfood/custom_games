@@ -12,11 +12,20 @@ import './Login.css';
 const Login = ({ setActiveUser }) => {
 	const navigate = useNavigate();
 	const [loginData, setLoginData] = useState({});
+	const [attempted, setAttempted] = useState(false);
 
 	useEffect(() => {
 		setActiveUser(null);
+		const loadedName = window.localStorage.getItem('username');
+		if (loadedName) {
+			setLoginData({ username: loadedName });
+		}
 	}, []);
-	const handleSubmit = () => {
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		setAttempted(true);
+		if (loginData.password[0] !== 'Summer') return;
+		window.localStorage.setItem('username', loginData.username);
 		setActiveUser(loginData);
 		navigate('/profile');
 	};
@@ -26,26 +35,29 @@ const Login = ({ setActiveUser }) => {
 		setLoginData((previous) => ({ ...previous, [target.name]: [target.value] }));
 	};
 	return (
-		<div id="login">
+		<div id="Login">
 			<form onSubmit={handleSubmit}>
-				<label>
+				<label className={attempted && 'attempted'}>
 					Email or username
 					<input
 						name="username"
 						type="text"
 						value={loginData.username}
 						onChange={handleInputChange}
+						required
 					/>
 				</label>
-				<label>
+				<label className={attempted && 'attempted'}>
 					Password
 					<input
 						name="password"
 						type="password"
 						value={loginData.password}
 						onChange={handleInputChange}
+						required
 					/>
 				</label>
+				{attempted && <p>That username/password does not exist. Please try again</p>}
 				<button type="submit">Log in</button>
 			</form>
 		</div>

@@ -1,5 +1,5 @@
-#Login {
-    text-align: left;
+#Login p {
+    color: red;
 }
 label {
     display: block;
@@ -9,4 +9,7 @@ label {
 label input {
     margin-left: 10px;
     float: right;
+}
+label input:invalid:required {
+    background-image: linear-gradient(to right, pink, lightgreen);
 }

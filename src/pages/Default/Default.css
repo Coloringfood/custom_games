@@ -5,6 +5,15 @@
   text-align: center;
 }
 
+.goals {
+  text-align: left;
+  width: 200px;
+  margin: auto;
+}
+
+#honors {
+  margin-top: 200px;
+}
 .logo {
   height: 6em;
   padding: 1.5em;
