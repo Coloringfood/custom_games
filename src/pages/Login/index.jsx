@@ -37,7 +37,7 @@ const Login = ({ setActiveUser }) => {
 	return (
 		<div id="Login">
 			<form onSubmit={handleSubmit}>
-				<label className={attempted && 'attempted'}>
+				<label className={(attempted && 'attempted') || ''}>
 					Email or username
 					<input
 						name="username"
@@ -47,7 +47,7 @@ const Login = ({ setActiveUser }) => {
 						required
 					/>
 				</label>
-				<label className={attempted && 'attempted'}>
+				<label className={(attempted && 'attempted') || ''}>
 					Password
 					<input
 						name="password"

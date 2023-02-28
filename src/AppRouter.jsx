@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+	NavLink,
+	Navigate,
+	Outlet,
+} from 'react-router-dom';
 
 import Login from '@/pages/Login/index.jsx';
 import Default from '@/pages/Default/index.jsx';
 import NotFound from '@/pages/NotFound/index.jsx';
-import Game from '@/pages/GameBoardDemo/index.jsx';
+import GameBoardDemo from '@/pages/GameBoardDemo/index.jsx';
+import GamesList from '@/pages/GameList/index.jsx';
 function About() {
 	return <h2>About</h2>;
 }
@@ -48,8 +56,11 @@ const AppRouter = () => {
 							<NavLink to="/about">About</NavLink>
 						</li>
 						{user && [
-							<li key={'Secured_game'}>
-								<NavLink to="/game">Game</NavLink>
+							<li key={'Secured_games'}>
+								<NavLink to="/games">Games</NavLink>
+							</li>,
+							<li key={'Secured_game_board'}>
+								<NavLink to="/game_board">Game Board Demo</NavLink>
 							</li>,
 							<li key={'Secured_profile'}>
 								<NavLink to="/profile">Hello {user.username}</NavLink>
@@ -72,10 +83,48 @@ const AppRouter = () => {
 						}
 					/>
 					<Route
-						path="/game"
+						path="/games"
 						element={
 							<SecuredRoute user={user}>
-								<Game user={user} />
+								<Outlet />
+							</SecuredRoute>
+						}
+					>
+						<Route index element={<GamesList user={user}></GamesList>} />
+						<Route path="/games/seven_dragons" element={<h1>Seven Dragons</h1>} />
+						<Route
+							path="/games/marbles"
+							element={
+								<div>
+									<h1>Marbles</h1>
+									<Outlet />
+								</div>
+							}
+						>
+							<Route index element={<h2>Marbles List</h2>} />
+							<Route path="/games/marbles/potion_explosion" element={<h2>Potion Explosion</h2>} />
+							<Route path="/games/marbles/gizmos" element={<h2>Gizmos</h2>} />
+						</Route>
+						<Route
+							path="/games/cards"
+							element={
+								<div>
+									<h1>Cards</h1>
+									<Outlet />
+								</div>
+							}
+						>
+							<Route index element={<h2>Cards List</h2>} />
+							<Route path="/games/cards/5_crowns" element={<h2>5 Crowns</h2>} />
+							<Route path="/games/cards/great_dalmuti" element={<h2>The Great Dalmuti</h2>} />
+						</Route>
+						<Route path="*" element={<NotFound />} />
+					</Route>
+					<Route
+						path="/game_board"
+						element={
+							<SecuredRoute user={user}>
+								<GameBoardDemo user={user} />
 							</SecuredRoute>
 						}
 					/>

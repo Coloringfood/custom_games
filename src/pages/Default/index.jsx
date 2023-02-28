@@ -10,7 +10,6 @@ function Default() {
 			<p className="goals">
 				<h2>Goals</h2>
 				<ul>
-					<li>5 Crowns</li>
 					<li>Seven Dragons</li>
 					<li>Potion Explosion</li>
 					<li>Gizmos</li>
