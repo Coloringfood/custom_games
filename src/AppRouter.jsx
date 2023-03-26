@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
+import { styled } from '@mui/material/styles';
 import {
 	BrowserRouter as Router,
 	Routes,
@@ -14,12 +23,17 @@ import Default from '@/pages/Default/index.jsx';
 import NotFound from '@/pages/NotFound/index.jsx';
 import GameBoardDemo from '@/pages/GameBoardDemo/index.jsx';
 import GamesList from '@/pages/GameList/index.jsx';
-function About() {
-	return <h2>About</h2>;
-}
+// import Tools from '@/pages/Tools/index.jsx';
+import { Paper } from '@mui/material';
 function Users() {
-	return <h2>Users</h2>;
+	return <h2>Profile</h2>;
 }
+const Root = styled(Paper)`
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 2rem;
+	text-align: center;
+`;
 
 /**
  * Creates a secured Route
@@ -43,37 +57,87 @@ SecuredRoute.propTypes = {
 
 const AppRouter = () => {
 	const [user, setUser] = useState(null);
+	const [anchorEl, setAnchorEl] = React.useState(null);
+
+	const handleMenu = (event) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
 
 	return (
 		<Router>
-			<div>
-				<nav>
-					<ul>
-						<li>
-							<NavLink to="/home">Home</NavLink>
-						</li>
-						<li>
-							<NavLink to="/about">About</NavLink>
-						</li>
-						{user && [
-							<li key={'Secured_games'}>
-								<NavLink to="/games">Games</NavLink>
-							</li>,
-							<li key={'Secured_game_board'}>
-								<NavLink to="/game_board">Game Board Demo</NavLink>
-							</li>,
-							<li key={'Secured_profile'}>
-								<NavLink to="/profile">Hello {user.username}</NavLink>
-							</li>,
-						]}
-						<li>
-							<NavLink to="/login">{user ? 'Sign Out' : 'Sign In'}</NavLink>
-						</li>
-					</ul>
-				</nav>
+			<AppBar position="static">
+				<Toolbar>
+					<IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
+						<MenuIcon />
+					</IconButton>
+					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+						<NavLink to="/home">Home</NavLink>
+					</Typography>
+					{user && [
+						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }} key={'Secured_games'}>
+							<NavLink to="/games">Games</NavLink>
+						</Typography>,
+						<Typography
+							variant="h6"
+							component="div"
+							sx={{ flexGrow: 1 }}
+							key={'Secured_game_board'}
+						>
+							<NavLink to="/game_board">Game Board Demo</NavLink>
+						</Typography>,
+					]}
+					{(user && (
+						<div>
+							<IconButton
+								size="large"
+								aria-label="account of current user"
+								aria-controls="menu-appbar"
+								aria-haspopup="true"
+								onClick={handleMenu}
+								color="inherit"
+							>
+								<AccountCircle />
+							</IconButton>
+							<Menu
+								id="menu-appbar"
+								anchorEl={anchorEl}
+								anchorOrigin={{
+									vertical: 'top',
+									horizontal: 'right',
+								}}
+								keepMounted
+								transformOrigin={{
+									vertical: 'top',
+									horizontal: 'right',
+								}}
+								open={Boolean(anchorEl)}
+								onClose={handleClose}
+							>
+								<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+									Hello {user.username}
+								</Typography>
+								<MenuItem onClick={handleClose}>
+									<NavLink to="/profile">Profile</NavLink>
+								</MenuItem>
+								<MenuItem onClick={handleClose}>
+									<NavLink to="/login">Sign Out</NavLink>
+								</MenuItem>
+							</Menu>
+						</div>
+					)) || (
+						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+							<NavLink to="/login">Sign In</NavLink>
+						</Typography>
+					)}
+				</Toolbar>
+			</AppBar>
+			<Root>
 				<Routes>
 					<Route path="/home" element={<Default />} />
-					<Route path="/about" element={<About />} />
 					<Route
 						path="/profile"
 						element={
@@ -133,7 +197,7 @@ const AppRouter = () => {
 					<Route path={'/'} element={<Navigate to={'/home'} />} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
-			</div>
+			</Root>
 		</Router>
 	);
 };

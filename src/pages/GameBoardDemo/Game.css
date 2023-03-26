@@ -1,4 +1,8 @@
 #GameGrid {
+    --board-game-height: 1000px;
+    --board-game-width: 700px;
+    --player-board-height: 200px;
+    --player-board-width: 500px;
     width: var(--board-game-height);
     height: var(--board-game-width);
     background-color: aliceblue;
