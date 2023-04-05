@@ -8,7 +8,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import { styled } from '@mui/material/styles';
+import { Container } from '@mui/material';
 import {
 	BrowserRouter as Router,
 	Routes,
@@ -18,22 +18,27 @@ import {
 	Outlet,
 } from 'react-router-dom';
 
+// Pages Import
 import Login from '@/pages/Login/index.jsx';
 import Default from '@/pages/Default/index.jsx';
 import NotFound from '@/pages/NotFound/index.jsx';
 import GameBoardDemo from '@/pages/GameBoardDemo/index.jsx';
 import GamesList from '@/pages/GameList/index.jsx';
-// import Tools from '@/pages/Tools/index.jsx';
-import { Paper } from '@mui/material';
+import GameScorer from '@/pages/GameScorer/index.jsx';
+import { styled } from '@mui/material/styles';
+
+// Styled Components
+const StyledNav = styled(NavLink)`
+	padding: 10px 20px;
+	border-radius: 10px;
+
+	&.active {
+		background-color: ${({ theme }) => theme.palette.secondary.main};
+	}
+`;
 function Users() {
 	return <h2>Profile</h2>;
 }
-const Root = styled(Paper)`
-	max-width: 1280px;
-	margin: 0 auto;
-	padding: 2rem;
-	text-align: center;
-`;
 
 /**
  * Creates a secured Route
@@ -75,11 +80,14 @@ const AppRouter = () => {
 						<MenuIcon />
 					</IconButton>
 					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-						<NavLink to="/home">Home</NavLink>
+						<StyledNav to="/home">Home</StyledNav>
+					</Typography>
+					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+						<StyledNav to="/scorer">Tools</StyledNav>
 					</Typography>
 					{user && [
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }} key={'Secured_games'}>
-							<NavLink to="/games">Games</NavLink>
+							<StyledNav to="/games">Games</StyledNav>
 						</Typography>,
 						<Typography
 							variant="h6"
@@ -87,7 +95,7 @@ const AppRouter = () => {
 							sx={{ flexGrow: 1 }}
 							key={'Secured_game_board'}
 						>
-							<NavLink to="/game_board">Game Board Demo</NavLink>
+							<StyledNav to="/game_board">Game Board Demo</StyledNav>
 						</Typography>,
 					]}
 					{(user && (
@@ -121,23 +129,24 @@ const AppRouter = () => {
 									Hello {user.username}
 								</Typography>
 								<MenuItem onClick={handleClose}>
-									<NavLink to="/profile">Profile</NavLink>
+									<StyledNav to="/profile">Profile</StyledNav>
 								</MenuItem>
 								<MenuItem onClick={handleClose}>
-									<NavLink to="/login">Sign Out</NavLink>
+									<StyledNav to="/login">Sign Out</StyledNav>
 								</MenuItem>
 							</Menu>
 						</div>
 					)) || (
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-							<NavLink to="/login">Sign In</NavLink>
+							<StyledNav to="/login">Sign In</StyledNav>
 						</Typography>
 					)}
 				</Toolbar>
 			</AppBar>
-			<Root>
+			<Container>
 				<Routes>
 					<Route path="/home" element={<Default />} />
+					<Route path="/scorer" element={<GameScorer />} />
 					<Route
 						path="/profile"
 						element={
@@ -197,7 +206,7 @@ const AppRouter = () => {
 					<Route path={'/'} element={<Navigate to={'/home'} />} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
-			</Root>
+			</Container>
 		</Router>
 	);
 };

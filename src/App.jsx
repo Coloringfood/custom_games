@@ -15,6 +15,23 @@ const darkTheme = createTheme({
 			main: '#11cb5f',
 		},
 	},
+	components: {
+		MuiDivider: {
+			styleOverrides: {
+				root: {
+					marginTop: '20px',
+					marginBottom: '20px',
+				},
+			},
+		},
+		MuiTypography: {
+			styleOverrides: {
+				root: {
+					marginBottom: '10px',
+				},
+			},
+		},
+	},
 });
 function App() {
 	return (
