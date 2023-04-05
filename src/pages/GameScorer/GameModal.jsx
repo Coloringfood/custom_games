@@ -110,9 +110,15 @@ function GameModal({ onStartGame, setModalOpen, modalOpen }) {
 							label="Game Title"
 							onChange={(e) => setGameName(e.target.value)}
 						/>
-						<TextField value={maxScore} label="Max score" onChange={requireNumber(setMaxScore)} />
+						<TextField
+							value={maxScore}
+							type="number"
+							label="Max score"
+							onChange={requireNumber(setMaxScore)}
+						/>
 						<TextField
 							value={maxRounds}
+							type="number"
 							label="Count of Max Rounds"
 							onChange={requireNumber(setMaxRounds)}
 						/>
