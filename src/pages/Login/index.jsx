@@ -9,14 +9,25 @@ import './Login.css';
  * @property {string} username - Represents the user's ID
  * @property {string} name - users display name
  */
-const Login = ({ setActiveUser }) => {
+const Login = ({ setActiveUser, activeUser }) => {
 	const navigate = useNavigate();
 	const [loginData, setLoginData] = useState({});
 	const [attempted, setAttempted] = useState(false);
 
 	useEffect(() => {
-		setActiveUser(null);
 		const loadedName = window.localStorage.getItem('username');
+		const loggedIn = window.localStorage.getItem('loggedIn');
+		console.log('BBBB loggedIn: ', loggedIn, activeUser);
+		if (loggedIn && !activeUser) {
+			console.log(`BBBB auto logging in user ${loggedIn}`);
+			setActiveUser({ username: loggedIn, password: ['Summer'] });
+			navigate('/profile');
+			return;
+		} else {
+			// If hitting this page after logging in, log out
+			window.localStorage.removeItem('loggedIn');
+			setActiveUser(null);
+		}
 		if (loadedName) {
 			setLoginData({ username: loadedName });
 		}
@@ -26,6 +37,7 @@ const Login = ({ setActiveUser }) => {
 		setAttempted(true);
 		if (loginData.password[0] !== 'Summer') return;
 		window.localStorage.setItem('username', loginData.username);
+		window.localStorage.setItem('loggedIn', loginData.username);
 		setActiveUser(loginData);
 		navigate('/profile');
 	};
@@ -66,6 +78,7 @@ const Login = ({ setActiveUser }) => {
 
 Login.propTypes = {
 	setActiveUser: PropTypes.func.isRequired,
+	activeUser: PropTypes.object,
 };
 
 export default React.memo(Login);

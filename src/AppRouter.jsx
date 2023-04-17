@@ -201,7 +201,7 @@ const AppRouter = () => {
 							</SecuredRoute>
 						}
 					/>
-					<Route path="/login" element={<Login setActiveUser={setUser} />} />
+					<Route path="/login" element={<Login setActiveUser={setUser} activeUser={user} />} />
 
 					<Route path={'/'} element={<Navigate to={'/home'} />} />
 					<Route path="*" element={<NotFound />} />
