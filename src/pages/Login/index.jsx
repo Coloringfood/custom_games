@@ -17,7 +17,7 @@ const Login = ({ setActiveUser, activeUser }) => {
 	useEffect(() => {
 		const loadedName = window.localStorage.getItem('username');
 		const loggedIn = window.localStorage.getItem('loggedIn');
-		console.log('BBBB loggedIn: ', loggedIn, activeUser);
+
 		if (loggedIn && !activeUser) {
 			console.log(`BBBB auto logging in user ${loggedIn}`);
 			setActiveUser({ username: loggedIn, password: ['Summer'] });

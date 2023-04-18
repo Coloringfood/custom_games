@@ -22,7 +22,7 @@ const MazeCell = styledC.td`
 			return '#f00';
 		}
 		if (solution) {
-			return '#00f';
+			return 'rgba(0, 200, 200, 0.5)';
 		}
 	}};
   border-top: 1px solid ${(props) => (props.north ? '#000' : '#fff')};
@@ -80,10 +80,8 @@ const Maze = () => {
 	const rightPressed = useKeyPress('ArrowRight');
 
 	const movePerson = useCallback((moveX, moveY) => {
-		console.log('BBBB moveX, moveY: ', moveX, moveY);
 		// check if allowed to move the indicated direction
 		const { north, south, east, west } = maze[person.y][person.x];
-		console.log('BBBB north, south, east, west: ', north, south, east, west);
 		if (moveX === 1 && east) return;
 		if (moveX === -1 && west) return;
 		if (moveY === 1 && south) return;
