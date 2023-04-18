@@ -25,6 +25,7 @@ import NotFound from '@/pages/NotFound/index.jsx';
 import GameBoardDemo from '@/pages/GameBoardDemo/index.jsx';
 import GamesList from '@/pages/GameList/index.jsx';
 import GameScorer from '@/pages/GameScorer/index.jsx';
+import Maze from '@/pages/Maze/index.jsx';
 import { styled } from '@mui/material/styles';
 
 // Styled Components
@@ -164,6 +165,7 @@ const AppRouter = () => {
 						}
 					>
 						<Route index element={<GamesList user={user}></GamesList>} />
+						<Route path="/games/maze" element={<Maze />} />
 						<Route path="/games/seven_dragons" element={<h1>Seven Dragons</h1>} />
 						<Route
 							path="/games/marbles"
