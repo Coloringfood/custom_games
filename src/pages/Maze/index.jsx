@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styledC from 'styled-components';
 
 import generateMaze from '@/pages/Maze/generateMaze.js';
+import traverseMaze from '@/pages/Maze/traverseMaze.js';
 
 const MazeWrapper = styledC.div`
   width: 100%;
@@ -13,12 +14,15 @@ const MazeWrapper = styledC.div`
 const MazeCell = styledC.td`
   width: 50px;
   height: 50px;
-  background-color: ${({ start, end }) => {
+  background-color: ${({ start, end, solution }) => {
 		if (start) {
 			return '#0f0';
 		}
 		if (end) {
 			return '#f00';
+		}
+		if (solution) {
+			return '#00f';
 		}
 	}};
   border-top: 1px solid ${(props) => (props.north ? '#000' : '#fff')};
@@ -60,6 +64,7 @@ const Maze = () => {
 	const [height, setHeight] = useState(10);
 	const [width, setWidth] = useState(10);
 	const [person, setPerson] = useState({ x: 0, y: 0 });
+	const [path, setPath] = useState([]);
 
 	useEffect(() => {
 		if (!maze.length) return;
@@ -105,7 +110,9 @@ const Maze = () => {
 
 	useEffect(() => {
 		if (!height || !width) return;
-		setMaze(generateMaze(height, width));
+		const maze = generateMaze(height, width);
+		setMaze(maze);
+		setPath(traverseMaze(maze));
 		setPerson({ x: 0, y: 0 });
 	}, [height, width]);
 
@@ -127,6 +134,7 @@ const Maze = () => {
 										{...cell}
 										start={i === 0 && j === 0}
 										end={i === maze.length - 1 && maze.length && j === maze[0].length - 1}
+										solution={path.includes(`${j},${i}`)}
 									>
 										{person.x === j && person.y === i && '👨'}
 									</MazeCell>
