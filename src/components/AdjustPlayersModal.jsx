@@ -4,7 +4,7 @@ import { Box, Button, Divider, Modal, TextField, Typography } from '@mui/materia
 import Grid2 from '@mui/material/Unstable_Grid2';
 import DeleteIcon from '@mui/icons-material/Delete.js';
 import PropTypes from 'prop-types';
-import { ButtonWrapper, style } from '@/pages/GameScorer/GameModal.jsx';
+import { ButtonWrapper, style } from '@/components/GameModal.jsx';
 import { styled } from '@mui/material/styles';
 
 const StyledButton = styled(Button)`

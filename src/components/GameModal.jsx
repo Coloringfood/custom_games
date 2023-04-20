@@ -14,7 +14,7 @@ import styledC from 'styled-components';
 import dataStore from '@/Utilities/dataStore.js';
 import MulitDropdown from '@/components/MulitDropdown.jsx';
 import PropTypes from 'prop-types';
-import AdjustPlayersModal from '@/pages/GameScorer/AdjustPlayersModal.jsx';
+import AdjustPlayersModal from '@/components/AdjustPlayersModal.jsx';
 import { CheckBox } from '@mui/icons-material';
 
 export const style = {

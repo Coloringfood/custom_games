@@ -70,10 +70,10 @@ function Default() {
 	return (
 		<div id="GameList">
 			<p>Here are the Games I have coded so far</p>
-			<p className="goals">
+			<div className="goals">
 				<h2>Goals</h2>
 				{renderGames(GAMES, '/games')}
-			</p>
+			</div>
 		</div>
 	);
 }

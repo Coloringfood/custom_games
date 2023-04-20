@@ -27,6 +27,7 @@ import GamesList from '@/pages/GameList/index.jsx';
 import GameScorer from '@/pages/GameScorer/index.jsx';
 import Maze from '@/pages/Maze/index.jsx';
 import { styled } from '@mui/material/styles';
+import FiveCrowns from '@/pages/FiveCrowns/index.jsx';
 
 // Styled Components
 const StyledNav = styled(NavLink)`
@@ -190,7 +191,7 @@ const AppRouter = () => {
 							}
 						>
 							<Route index element={<h2>Cards List</h2>} />
-							<Route path="/games/cards/5_crowns" element={<h2>5 Crowns</h2>} />
+							<Route path="/games/cards/5_crowns" element={<FiveCrowns />} />
 							<Route path="/games/cards/great_dalmuti" element={<h2>The Great Dalmuti</h2>} />
 						</Route>
 						<Route path="*" element={<NotFound />} />
