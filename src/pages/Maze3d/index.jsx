@@ -4,8 +4,6 @@ import styledC from 'styled-components';
 import generateMaze3D from '@/pages/Maze3d/generateMaze3D.js';
 import traverseMaze3D from '@/pages/Maze3d/traverseMaze3D.js';
 
-const zeroPad = (num, places) => String(num).padStart(places, '0');
-
 const MazeWrapper = styledC.div`
   width: 100%;
   height: 100%;
@@ -23,8 +21,8 @@ const MazeCell = styledC.td`
 		if (end) {
 			return '#f00';
 		}
-		if (solution !== -1) {
-			return `rgba(0, 200, 200, 0.${zeroPad(solution, 2) + 10})`;
+		if (solution) {
+			return `rgba(0, 200, 200, 0.${Math.floor(60 * solution + 10)})`;
 		}
 	}};
   border-top: 1px solid ${(props) => (props.north ? '#000' : '#fff')};
@@ -142,27 +140,30 @@ const Maze = () => {
 	const renderMazeFloor = () => {
 		return maze.map((row, i) => (
 			<tr key={i}>
-				{row.map((cell, j) => (
-					<MazeCell
-						key={j}
-						{...cell[person.z]}
-						start={i === 0 && j === 0 && person.z === 0}
-						end={
-							i === maze.length - 1 &&
-							maze.length &&
-							j === maze[0].length - 1 &&
-							person.z === maze[0][0].length - 1
-						}
-						solution={path.indexOf(`${j},${i},${person.z}`)}
-					>
-						<span className="coords">
-							{i},{j},{person.z}
-						</span>
-						{!cell[person.z].up && <span className="up">⬆️</span>}
-						{!cell[person.z].down && <span className="up">⬇️</span>}
-						{person.x === j && person.y === i && '👨'}
-					</MazeCell>
-				))}
+				{row.map((cell, j) => {
+					const indexInPath = path.indexOf(`${j},${i},${person.z}`);
+					return (
+						<MazeCell
+							key={j}
+							{...cell[person.z]}
+							start={i === 0 && j === 0 && person.z === 0}
+							end={
+								i === maze.length - 1 &&
+								maze.length &&
+								j === maze[0].length - 1 &&
+								person.z === maze[0][0].length - 1
+							}
+							solution={indexInPath !== -1 && indexInPath / path.length}
+						>
+							<span className="coords">
+								{i},{j},{person.z}
+							</span>
+							{!cell[person.z].up && <span className="up">⬆️</span>}
+							{!cell[person.z].down && <span className="up">⬇️</span>}
+							{person.x === j && person.y === i && '👨'}
+						</MazeCell>
+					);
+				})}
 			</tr>
 		));
 	};

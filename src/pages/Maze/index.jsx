@@ -4,8 +4,6 @@ import styledC from 'styled-components';
 import generateMaze from '@/pages/Maze/generateMaze.js';
 import traverseMaze from '@/pages/Maze/traverseMaze.js';
 
-const zeroPad = (num, places) => String(num).padStart(places, '0');
-
 const MazeWrapper = styledC.div`
   width: 100%;
   height: 100%;
@@ -23,8 +21,8 @@ const MazeCell = styledC.td`
 		if (end) {
 			return '#f00';
 		}
-		if (solution !== -1) {
-			return `rgba(0, 200, 200, 0.${zeroPad(solution, 2) + 10})`;
+		if (solution) {
+			return `rgba(0, 200, 200, 0.${Math.floor(60 * solution + 10)})`;
 		}
 	}};
   border-top: 1px solid ${(props) => (props.north ? '#000' : '#fff')};
@@ -143,20 +141,23 @@ const Maze = () => {
 					<tbody>
 						{maze.map((row, i) => (
 							<tr key={i}>
-								{row.map((cell, j) => (
-									<MazeCell
-										key={j}
-										{...cell}
-										start={i === 0 && j === 0}
-										end={i === maze.length - 1 && maze.length && j === maze[0].length - 1}
-										solution={path.indexOf(`${j},${i}`)}
-									>
-										<span className="coords">
-											{i},{j}
-										</span>
-										{person.x === j && person.y === i && '👨'}
-									</MazeCell>
-								))}
+								{row.map((cell, j) => {
+									const indexInPath = path.indexOf(`${j},${i}`);
+									return (
+										<MazeCell
+											key={j}
+											{...cell}
+											start={i === 0 && j === 0}
+											end={i === maze.length - 1 && maze.length && j === maze[0].length - 1}
+											solution={indexInPath !== -1 && indexInPath / path.length}
+										>
+											<span className="coords">
+												{i},{j}
+											</span>
+											{person.x === j && person.y === i && '👨'}
+										</MazeCell>
+									);
+								})}
 							</tr>
 						))}
 					</tbody>
