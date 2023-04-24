@@ -23,7 +23,7 @@ const MazeCell = styledC.td`
 		if (end) {
 			return '#f00';
 		}
-		if (solution) {
+		if (solution !== -1) {
 			return `rgba(0, 200, 200, 0.${zeroPad(solution, 2) + 10})`;
 		}
 	}};
@@ -149,7 +149,7 @@ const Maze = () => {
 										{...cell}
 										start={i === 0 && j === 0}
 										end={i === maze.length - 1 && maze.length && j === maze[0].length - 1}
-										solution={path.includes(`${j},${i}`)}
+										solution={path.indexOf(`${j},${i}`)}
 									>
 										<span className="coords">
 											{i},{j}

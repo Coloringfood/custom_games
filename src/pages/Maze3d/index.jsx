@@ -23,7 +23,7 @@ const MazeCell = styledC.td`
 		if (end) {
 			return '#f00';
 		}
-		if (solution) {
+		if (solution !== -1) {
 			return `rgba(0, 200, 200, 0.${zeroPad(solution, 2) + 10})`;
 		}
 	}};
@@ -69,9 +69,9 @@ const useKeyPress = function (targetKey) {
 
 const Maze = () => {
 	const [maze, setMaze] = useState([]);
-	const [height, setHeight] = useState(10);
-	const [width, setWidth] = useState(10);
-	const [depth, setDepth] = useState(10);
+	const [height, setHeight] = useState(5);
+	const [width, setWidth] = useState(5);
+	const [depth, setDepth] = useState(2);
 	const [person, setPerson] = useState({ x: 0, y: 0, z: 0 });
 	const [path, setPath] = useState([]);
 
@@ -137,7 +137,7 @@ const Maze = () => {
 		setMaze(maze);
 		setPath(traverseMaze3D(maze));
 		setPerson({ x: 0, y: 0, z: 0 });
-	}, [height, width]);
+	}, [height, width, depth]);
 
 	const renderMazeFloor = () => {
 		return maze.map((row, i) => (
