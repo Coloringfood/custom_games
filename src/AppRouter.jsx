@@ -28,6 +28,7 @@ import GameScorer from '@/pages/GameScorer/index.jsx';
 import Maze from '@/pages/Maze/index.jsx';
 import { styled } from '@mui/material/styles';
 import FiveCrowns from '@/pages/FiveCrowns/index.jsx';
+import Maze3d from '@/pages/Maze3d/index.jsx';
 
 // Styled Components
 const StyledNav = styled(NavLink)`
@@ -48,11 +49,17 @@ function Users() {
  *
  * @param {UserObject} user - represents the logged-in user
  * @param children - represents the component to render if user is logged in
+ * @param setPreviousLocation - represents the function to set the previous location
  * @returns {*|JSX.Element}
  * @constructor
  */
-const SecuredRoute = ({ user, children }) => {
+const SecuredRoute = ({ user, children, setPreviousLocation }) => {
+	// Grab current path
+	const currentPath = window.location.pathname;
+	// If user is not logged in, redirect to login page
 	if (!user) {
+		// If user is not logged in, save current path
+		setPreviousLocation(currentPath);
 		return <Navigate to="/login" />;
 	}
 	return children;
@@ -60,10 +67,12 @@ const SecuredRoute = ({ user, children }) => {
 SecuredRoute.propTypes = {
 	user: PropTypes.object,
 	children: PropTypes.object,
+	setPreviousLocation: PropTypes.func,
 };
 
 const AppRouter = () => {
 	const [user, setUser] = useState(null);
+	const [previousLocation, setPreviousLocation] = useState(null);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 
 	const handleMenu = (event) => {
@@ -152,7 +161,7 @@ const AppRouter = () => {
 					<Route
 						path="/profile"
 						element={
-							<SecuredRoute user={user}>
+							<SecuredRoute user={user} setPreviousLocation={setPreviousLocation}>
 								<Users />
 							</SecuredRoute>
 						}
@@ -160,13 +169,24 @@ const AppRouter = () => {
 					<Route
 						path="/games"
 						element={
-							<SecuredRoute user={user}>
+							<SecuredRoute user={user} setPreviousLocation={setPreviousLocation}>
 								<Outlet />
 							</SecuredRoute>
 						}
 					>
 						<Route index element={<GamesList user={user}></GamesList>} />
-						<Route path="/games/maze" element={<Maze />} />
+						<Route
+							path="/games/maze"
+							element={
+								<div>
+									<h1>Maze</h1>
+									<Outlet />
+								</div>
+							}
+						>
+							<Route index element={<Maze />} />
+							<Route path="/games/maze/3d" element={<Maze3d />} />
+						</Route>
 						<Route path="/games/seven_dragons" element={<h1>Seven Dragons</h1>} />
 						<Route
 							path="/games/marbles"
@@ -199,12 +219,21 @@ const AppRouter = () => {
 					<Route
 						path="/game_board"
 						element={
-							<SecuredRoute user={user}>
+							<SecuredRoute user={user} setPreviousLocation={setPreviousLocation}>
 								<GameBoardDemo user={user} />
 							</SecuredRoute>
 						}
 					/>
-					<Route path="/login" element={<Login setActiveUser={setUser} activeUser={user} />} />
+					<Route
+						path="/login"
+						element={
+							<Login
+								setActiveUser={setUser}
+								activeUser={user}
+								previousLocation={previousLocation}
+							/>
+						}
+					/>
 
 					<Route path={'/'} element={<Navigate to={'/home'} />} />
 					<Route path="*" element={<NotFound />} />

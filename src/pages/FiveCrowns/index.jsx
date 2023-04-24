@@ -167,6 +167,16 @@ const sortHands = (hands, numberFirst = true) => {
 // 	));
 // };
 
+//TODO:
+/*
+  - When a player can go out, have them choose to go out or not
+  - Clean up PlayerBoard component so that it shows what is needed
+    - Maybe clean up the Cards Displaying so they don't overlap things.
+  - When a player goes out, show their discarded cards
+  - At the end of the round make a button to start the next round
+  - Make a better "Player has gone out" appearance
+ */
+
 const suits = ['hearts', 'diamonds', 'clovers', 'spades', 'stars'];
 const values = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 

@@ -10,6 +10,12 @@ const GAMES = [
 	{
 		label: 'Maze',
 		path: '/maze',
+		subGames: [
+			{
+				label: '3D Maze',
+				path: '/3d',
+			},
+		],
 	},
 	{
 		label: 'Marble Games',

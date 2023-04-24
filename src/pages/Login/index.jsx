@@ -9,7 +9,7 @@ import './Login.css';
  * @property {string} username - Represents the user's ID
  * @property {string} name - users display name
  */
-const Login = ({ setActiveUser, activeUser }) => {
+const Login = ({ setActiveUser, activeUser, previousLocation }) => {
 	const navigate = useNavigate();
 	const [loginData, setLoginData] = useState({});
 	const [attempted, setAttempted] = useState(false);
@@ -21,7 +21,7 @@ const Login = ({ setActiveUser, activeUser }) => {
 		if (loggedIn && !activeUser) {
 			console.log(`BBBB auto logging in user ${loggedIn}`);
 			setActiveUser({ username: loggedIn, password: ['Summer'] });
-			navigate('/profile');
+			navigate(previousLocation || '/profile');
 			return;
 		} else {
 			// If hitting this page after logging in, log out
@@ -79,6 +79,7 @@ const Login = ({ setActiveUser, activeUser }) => {
 Login.propTypes = {
 	setActiveUser: PropTypes.func.isRequired,
 	activeUser: PropTypes.object,
+	previousLocation: PropTypes.string,
 };
 
 export default React.memo(Login);
