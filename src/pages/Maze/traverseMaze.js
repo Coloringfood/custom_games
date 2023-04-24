@@ -10,7 +10,7 @@ export default function traverseMaze(maze) {
 	console.log('BBBB ---------2D-----------');
 
 	//TODO: traverse the maze and return a path through it
-	const taverseMaze = (x, y, previousLocations = []) => {
+	const traverseMaze = (x, y, previousLocations = []) => {
 		const currentLocation = `${x},${y}`;
 		const { north: northWall, south: southWall, east: eastWall, west: westWall } = maze[y][x];
 		if (currentLocation === end) {
@@ -23,7 +23,7 @@ export default function traverseMaze(maze) {
 
 		return [];
 	};
-	const path = taverseMaze(0, 0, []);
+	const path = traverseMaze(0, 0, []);
 
 	// Example return array = ['0,0', '0,1', '1,1'] = ['x,y', 'x,y', 'x,y']
 	return path;
