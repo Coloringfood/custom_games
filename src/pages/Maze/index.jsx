@@ -4,6 +4,8 @@ import styledC from 'styled-components';
 import generateMaze from '@/pages/Maze/generateMaze.js';
 import traverseMaze from '@/pages/Maze/traverseMaze.js';
 
+const zeroPad = (num, places) => String(num).padStart(places, '0');
+
 const MazeWrapper = styledC.div`
   width: 100%;
   height: 100%;
@@ -22,7 +24,7 @@ const MazeCell = styledC.td`
 			return '#f00';
 		}
 		if (solution) {
-			return 'rgba(0, 200, 200, 0.5)';
+			return `rgba(0, 200, 200, 0.${zeroPad(solution, 2) + 10})`;
 		}
 	}};
   border-top: 1px solid ${(props) => (props.north ? '#000' : '#fff')};
@@ -126,6 +128,15 @@ const Maze = () => {
 				<h3>Select Maze Size</h3>
 				<input type={'number'} value={height} onChange={(e) => setHeight(e.target.value)} />
 				<input type={'number'} value={width} onChange={(e) => setWidth(e.target.value)} />
+			</div>
+			<div>
+				<h3>Instructions</h3>
+				<p>Use the arrow keys to move the person through the maze.</p>
+				<p>Green represents the start and Red represents the destination</p>
+				<p>
+					Yellow represents the solution path for people coding a solution in the traverseMaze.js
+				</p>
+				<p>Start in the top left corner, and try to get to the bottom right</p>
 			</div>
 			<MazeWrapper>
 				<table>

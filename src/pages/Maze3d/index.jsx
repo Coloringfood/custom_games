@@ -4,6 +4,8 @@ import styledC from 'styled-components';
 import generateMaze3D from '@/pages/Maze3d/generateMaze3D.js';
 import traverseMaze3D from '@/pages/Maze3d/traverseMaze3D.js';
 
+const zeroPad = (num, places) => String(num).padStart(places, '0');
+
 const MazeWrapper = styledC.div`
   width: 100%;
   height: 100%;
@@ -22,7 +24,7 @@ const MazeCell = styledC.td`
 			return '#f00';
 		}
 		if (solution) {
-			return 'rgba(0, 200, 200, 0.5)';
+			return `rgba(0, 200, 200, 0.${zeroPad(solution, 2) + 10})`;
 		}
 	}};
   border-top: 1px solid ${(props) => (props.north ? '#000' : '#fff')};
@@ -151,7 +153,7 @@ const Maze = () => {
 							j === maze[0].length - 1 &&
 							person.z === maze[0][0].length - 1
 						}
-						solution={path.includes(`${j},${i},${person.z}`)}
+						solution={path.indexOf(`${j},${i},${person.z}`)}
 					>
 						<span className="coords">
 							{i},{j},{person.z}
@@ -173,14 +175,21 @@ const Maze = () => {
 				<input type={'number'} value={width} onChange={(e) => setWidth(e.target.value)} />
 				<input type={'number'} value={depth} onChange={(e) => setDepth(e.target.value)} />
 			</div>
+			<div>
+				<h4>Instructions</h4>
+				<p>Use the arrow keys to move around the maze.</p>
+				<p>Use the space bar to move up a floor.</p>
+				<p>Use the shift key to move down a floor.</p>
+				<p>Green represents the start and Red represents the destination</p>
+				<p>
+					Yellow represents the solution path for people coding a solution in the traverseMaze3d.js
+				</p>
+			</div>
 			<div>Floor: {person.z}</div>
 			<MazeWrapper>
 				<table>
 					<tbody>{renderMazeFloor()}</tbody>
 				</table>
-				{/*{(maze.length && maze[0].length && maze[0][0].length && (*/}
-				{/*	<ThreeDMaze maze={maze} person={person} path={path} />*/}
-				{/*)) || <div>Loading...</div>}*/}
 			</MazeWrapper>
 		</div>
 	);
