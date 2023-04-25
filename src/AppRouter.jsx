@@ -29,6 +29,7 @@ import Maze from '@/pages/Maze/index.jsx';
 import { styled } from '@mui/material/styles';
 import FiveCrowns from '@/pages/FiveCrowns/index.jsx';
 import Maze3d from '@/pages/Maze3d/index.jsx';
+import Sudoku from '@/pages/Sudoku/index.jsx';
 
 // Styled Components
 const StyledNav = styled(NavLink)`
@@ -175,6 +176,7 @@ const AppRouter = () => {
 						}
 					>
 						<Route index element={<GamesList user={user}></GamesList>} />
+						<Route path="/games/sudoku" element={<Sudoku />} />
 						<Route
 							path="/games/maze"
 							element={

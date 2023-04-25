@@ -18,6 +18,10 @@ const GAMES = [
 		],
 	},
 	{
+		label: 'Sudoku',
+		path: '/sudoku',
+	},
+	{
 		label: 'Marble Games',
 		path: '/marbles',
 		subGames: [
