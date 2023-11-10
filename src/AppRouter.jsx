@@ -30,6 +30,8 @@ import { styled } from '@mui/material/styles';
 import FiveCrowns from '@/pages/FiveCrowns/index.jsx';
 import Maze3d from '@/pages/Maze3d/index.jsx';
 import Sudoku from '@/pages/Sudoku/index.jsx';
+import Test from '@/pages/Test/index.jsx';
+import Quilting from '@/pages/Quilting/index.jsx';
 
 // Styled Components
 const StyledNav = styled(NavLink)`
@@ -159,6 +161,8 @@ const AppRouter = () => {
 				<Routes>
 					<Route path="/home" element={<Default />} />
 					<Route path="/scorer" element={<GameScorer />} />
+					<Route path="/test" element={<Test />} />
+					<Route path="/quilting" element={<Quilting />} />
 					<Route
 						path="/profile"
 						element={

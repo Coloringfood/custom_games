@@ -120,6 +120,14 @@ const Sudoku = () => {
 		setSudokuTable(newTable);
 	};
 
+	const isNumberFinished = useCallback(
+		(number) => {
+			const numberCount = _.flatten(sudokuTable).filter((cell) => cell === number).length;
+			return numberCount === 9;
+		},
+		[sudokuTable],
+	);
+
 	const renderSudokuTable = useCallback(() => {
 		return (
 			<SudokuTable>
@@ -151,10 +159,16 @@ const Sudoku = () => {
 		);
 	}, [sudokuTable, activeNumber, showSolution]);
 
-	console.log('BBBB createSudokuPuzzle(1): ', createSudokuPuzzle(1));
-
+	const testCode = async () => {
+		console.log('BBBB --------------------');
+		const [newStartingPuzzle, newSolvedPuzzle] = await createSudokuPuzzle('');
+		setStartingTable(newStartingPuzzle);
+		setSudokuSolution(newSolvedPuzzle);
+		setSudokuTable(_.cloneDeep(newStartingPuzzle));
+	};
 	return (
 		<div>
+			<Button onClick={testCode}>Test Code</Button>
 			<Button onClick={() => setShowSolution((previous) => !previous)}>
 				{showSolution ? 'Hide Got Solution' : 'Show Got Solution'}
 			</Button>
@@ -165,12 +179,13 @@ const Sudoku = () => {
 					return (
 						<NumberButton
 							active={activeNumber === number}
+							disabled={isNumberFinished(number)}
 							key={`number_${number}`}
 							onClick={() => {
 								toggleActiveNumber(number);
 							}}
 						>
-							{number}
+							{number || 'X'}
 						</NumberButton>
 					);
 				})}
