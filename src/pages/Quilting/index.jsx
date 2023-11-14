@@ -24,7 +24,6 @@ options.forEach((option, index) => {
 		uniquePairs.push([option, options[i]]);
 	}
 });
-console.log('BBBB uniquePairs: ', uniquePairs);
 
 const width = 12;
 const height = 18;
@@ -64,8 +63,6 @@ const PairCount = styled.div`
 	text-align: left;
 	width: 150px;
 `;
-const debug = false;
-const log = (prefix, ...message) => debug && console.log(`${prefix.length}${prefix}: `, ...message);
 
 const generatePairings = () => {
 	const options = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -145,10 +142,7 @@ const generatePairings2 = () => {
 		oddRow = false,
 		row,
 	) => {
-		const prefix = new Array(currentPairings.length).fill('>').join('');
-		log(prefix, `BBBB Row: ${row}${oddRow}  Slot: ${currentPairings.length}`);
 		if (currentPairings.length === width) {
-			log(prefix, 'FOUND EXACT ROW SIZE');
 			return [currentPairings, unUsedPairs];
 		}
 		const [A] = currentPairings[currentPairings.length - 1];
@@ -177,7 +171,6 @@ const generatePairings2 = () => {
 			.slice(-3)
 			.reduce((acc, [C, D]) => [...acc, C, D], [matchingValue])
 			.concat(previousRow[currentPairings.length + 1]);
-		// console.log('BBBB recentlyUsedColors: ', recentlyUsedColors);
 
 		let bestAttempt = currentPairings;
 		let bestRemaining = unUsedPairs;
@@ -222,7 +215,6 @@ const generatePairings2 = () => {
 		const matchingIndex = isRowEven ? 0 : 1;
 		const matchingValue = start[matchingIndex];
 		const notMatchingValues = [start[(matchingIndex + 1) % 2], ...previousRow[1]];
-		// console.log('BBBB notMatchingValues: ', notMatchingValues);
 		let startingPair = remainingPairs.find(
 			([a, b]) =>
 				(a === matchingValue && !notMatchingValues.includes(b)) ||
@@ -245,7 +237,6 @@ const generatePairings2 = () => {
 		const rowCount = Math.floor(pairings.length / width);
 		const previousRow = pairings.length >= width ? pairings.slice(pairings.length - width) : [];
 		const startPairing = findStartingPairing(previousRow, rowCount % 2 === 0);
-		// console.log('BBBB startPairing: ', startPairing);
 		const remainingPairings = [
 			...uniquePairs.filter(([a, b]) => !(a === startPairing[0] && b === startPairing[1])),
 		];
@@ -314,7 +305,6 @@ const Test = () => {
 	const [pairs2, setPairs2] = React.useState([]);
 
 	React.useEffect(() => {
-		console.log('BBBB jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj');
 		const pairsResult = generatePairings();
 		setPairs(pairsResult);
 		const pairsResult2 = generatePairings2();
@@ -323,7 +313,6 @@ const Test = () => {
 
 	const exportPattern = () => {
 		const pattern = pairs2.map(([A, B]) => `${A}${B}`).join('');
-		console.log('BBBB pattern:');
 		console.log(pattern);
 		alert(pattern);
 	};
