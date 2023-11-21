@@ -1,8 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
+import Collapse from '@mui/material/Collapse';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import TextField from '@mui/material/TextField';
 import _ from 'lodash';
 
-const ColorMapping = {
+const DefaultColorMapping = {
 	1: 'darkgreen',
 	2: '#FFFFE0',
 	3: 'lightblue',
@@ -11,17 +18,18 @@ const ColorMapping = {
 	6: '#F2C0C0',
 	7: '#FFC057',
 	8: '#81CCCF',
-	// 9: 'red',
+	9: '#D2A0A0',
 	// 10: 'purple',
 };
-const options = Object.keys(ColorMapping);
-const uniquePairs = [];
+const ColorMapping = { ...DefaultColorMapping };
+const defaultOptions = Object.keys(DefaultColorMapping);
+const defaultUniquePairs = [];
 // map each option to each other option
-options.forEach((option, index) => {
+defaultOptions.forEach((option, index) => {
 	// start at the next option
-	for (let i = index + 1; i < options.length; i++) {
+	for (let i = index + 1; i < defaultOptions.length; i++) {
 		// push the pair
-		uniquePairs.push([option, options[i]]);
+		defaultUniquePairs.push([option, defaultOptions[i]]);
 	}
 });
 
@@ -128,7 +136,7 @@ const generatePairings = () => {
 	return pairings;
 };
 
-const generatePairings2 = () => {
+const generatePairings2 = (uniquePairs) => {
 	// 28 width
 	// 18 down
 	// 504 Options max in pairings
@@ -269,7 +277,7 @@ const generatePairings2 = () => {
 	return [...pairings];
 };
 
-const countUniquePairings = (pairings) => {
+const countUniquePairings = (pairings, options, uniquePairs) => {
 	const pairsMapping = {};
 	// map each option to each other option
 	options.forEach((option, index) => {
@@ -303,13 +311,38 @@ const countMapping = (pairings) => {
 const Test = () => {
 	const [pairs, setPairs] = React.useState([]);
 	const [pairs2, setPairs2] = React.useState([]);
+	const [options, setOptions] = React.useState(defaultOptions);
+	const [uniquePairs, setUniquePairs] = React.useState(defaultUniquePairs);
+	const [showCustomOptions, setShowCustomOptions] = React.useState(false);
+	const [showPairings, setShowPairings] = React.useState(false);
+	const [showQuantityCount, setShowQuantityCount] = React.useState(false);
+
+	const handleChange = (setFunc) => () => {
+		setFunc((prev) => !prev);
+	};
 
 	React.useEffect(() => {
 		const pairsResult = generatePairings();
 		setPairs(pairsResult);
-		const pairsResult2 = generatePairings2();
+		const pairsResult2 = generatePairings2(uniquePairs);
 		setPairs2(pairsResult2);
 	}, []);
+
+	React.useEffect(() => {
+		const newPairs = [];
+		options.forEach((option, index) => {
+			// start at the next option
+			for (let i = index + 1; i < options.length; i++) {
+				// push the pair
+				newPairs.push([option, options[i]]);
+			}
+		});
+		setUniquePairs(newPairs);
+
+		console.log('BBBB ------------------------------');
+		const pairsResult2 = generatePairings2(newPairs);
+		setPairs2(pairsResult2);
+	}, [options]);
 
 	const exportPattern = () => {
 		const pattern = pairs2.map(([A, B]) => `${A}${B}`).join('');
@@ -327,11 +360,26 @@ const Test = () => {
 		setPairs2(pairsResult);
 	};
 	const shufflePattern = () => {
-		const pairsResult2 = generatePairings2();
+		const pairsResult2 = generatePairings2(uniquePairs);
 		setPairs2(pairsResult2);
 	};
+	const addOption = () => {
+		const newOption = options.length + 1;
+		setOptions((previous) => [...previous, newOption]);
+		if (!ColorMapping[newOption]) ColorMapping[newOption] = 'orange';
+	};
+	const removeOption = () => {
+		setOptions((previous) => previous.slice(0, -1));
+		delete ColorMapping[options.length];
+	};
 
-	const colorCount = countUniquePairings(pairs2);
+	const setColor = (index) => (event) => {
+		const newColor = event.target.value;
+		ColorMapping[index] = newColor;
+		setOptions((previous) => [...previous]);
+	};
+
+	const colorCount = countUniquePairings(pairs2, options, uniquePairs);
 	const mappingCount = countMapping(colorCount);
 
 	return (
@@ -347,25 +395,69 @@ const Test = () => {
 					</div>
 				))}
 			</div>
+
+			<FormControlLabel
+				control={
+					<Switch checked={showCustomOptions} onChange={handleChange(setShowCustomOptions)} />
+				}
+				label="Show Customization Options"
+			/>
+			<Collapse in={showCustomOptions}>
+				<div>
+					<button onClick={exportPattern}>Export Pattern</button>
+					<button onClick={importPattern}>Import Pattern</button>
+					<button onClick={shufflePattern}>Shuffle Pattern</button>
+				</div>
+				<div>
+					<p>Colors</p>
+					<Fab color="primary" aria-label="remove">
+						<RemoveIcon onClick={removeOption} />
+					</Fab>
+					<Fab color="primary" aria-label="add">
+						<AddIcon onClick={addOption} />
+					</Fab>
+				</div>
+				<div>
+					<br />
+					{options.map((option) => (
+						<TextField
+							key={option}
+							value={ColorMapping[option]}
+							onChange={setColor(option)}
+							label={`Color ${option}`}
+							variant="outlined"
+						/>
+					))}
+				</div>
+			</Collapse>
 			<div>
-				<button onClick={exportPattern}>Export Pattern</button>
-				<button onClick={importPattern}>Import Pattern</button>
-				<button onClick={shufflePattern}>Shuffle Pattern</button>
-			</div>
-			<div>
-				<p>Unique Pairings</p>
-				{Object.entries(colorCount).map(([key, value]) => (
-					<PairCount key={key}>
-						<Pairing A={key.split(' - ')[0]} B={key.split(' - ')[1]} />
-						<b style={{ marginLeft: 10 }}>{key}</b>: {value}
-					</PairCount>
-				))}
-				<p>Quantity Count</p>
-				{Object.entries(mappingCount).map(([key, value]) => (
-					<div key={key}>
-						<b style={{ marginLeft: 10 }}>{key}</b>: {value}
-					</div>
-				))}
+				<p></p>
+				<FormControlLabel
+					control={<Switch checked={showPairings} onChange={handleChange(setShowPairings)} />}
+					label="Show Unique Pairings"
+				/>
+				<Collapse in={showPairings}>
+					{Object.entries(colorCount).map(([key, value]) => (
+						<PairCount key={key}>
+							<Pairing A={key.split(' - ')[0]} B={key.split(' - ')[1]} />
+							<b style={{ marginLeft: 10 }}>{key}</b>: {value}
+						</PairCount>
+					))}
+				</Collapse>
+				<FormControlLabel
+					control={
+						<Switch checked={showQuantityCount} onChange={handleChange(setShowQuantityCount)} />
+					}
+					label="Show Quantity Count"
+				/>
+
+				<Collapse in={showQuantityCount}>
+					{Object.entries(mappingCount).map(([key, value]) => (
+						<div key={key}>
+							<b style={{ marginLeft: 10 }}>{key}</b>: {value}
+						</div>
+					))}
+				</Collapse>
 			</div>
 			<Quilt2>
 				{pairs2.map(([option1, option2], index) => {
@@ -374,13 +466,18 @@ const Test = () => {
 					return <Pairing key={index} A={option1} B={option2} angle={(index + swapAngle) % 2} />;
 				})}
 			</Quilt2>
-			<Quilt>
-				{pairs.map(([option1, option2], index) => {
-					const row = Math.floor(index / 12);
-					const swapAngle = row % 2 === 0 ? 1 : 0;
-					return <Pairing key={index} A={option1} B={option2} angle={(index + swapAngle) % 2} />;
-				})}
-			</Quilt>
+			<br />
+			<br />
+			<div>
+				Original attempt&apos;s quilt:
+				<Quilt>
+					{pairs.map(([option1, option2], index) => {
+						const row = Math.floor(index / 12);
+						const swapAngle = row % 2 === 0 ? 1 : 0;
+						return <Pairing key={index} A={option1} B={option2} angle={(index + swapAngle) % 2} />;
+					})}
+				</Quilt>
+			</div>
 		</div>
 	);
 };
