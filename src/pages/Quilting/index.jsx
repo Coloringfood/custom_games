@@ -4,6 +4,7 @@ import Collapse from '@mui/material/Collapse';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Fab from '@mui/material/Fab';
+import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import TextField from '@mui/material/TextField';
@@ -71,6 +72,28 @@ const PairCount = styled.div`
 	text-align: left;
 	width: 150px;
 `;
+
+const calculateScore = (mappingValues) => {
+	let score = mappingValues.length;
+	// const lowest = _.min(mappingValues);
+	// const highest = _.max(mappingValues);
+	// score += highest - lowest;
+	// switch (lowest) {
+	// 	case 0:
+	// 		score += 100;
+	// 		break;
+	// 	case 1:
+	// 		score += 50;
+	// 		break;
+	// 	case 2:
+	// 		score += 25;
+	// 		break;
+	// 	case 3:
+	// 		score += 10;
+	// 		break;
+	// }
+	return score;
+};
 
 const generatePairings = () => {
 	const options = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -316,9 +339,14 @@ const Test = () => {
 	const [showCustomOptions, setShowCustomOptions] = React.useState(false);
 	const [showPairings, setShowPairings] = React.useState(false);
 	const [showQuantityCount, setShowQuantityCount] = React.useState(false);
+	const [attemptsCount, setAttemptsCount] = React.useState(10);
 
-	const handleChange = (setFunc) => () => {
+	const toggleValue = (setFunc) => () => {
 		setFunc((prev) => !prev);
+	};
+
+	const handleChange = (setFunc) => (event) => {
+		setFunc(event.target.value);
 	};
 
 	React.useEffect(() => {
@@ -374,13 +402,33 @@ const Test = () => {
 	};
 
 	const setColor = (index) => (event) => {
-		const newColor = event.target.value;
-		ColorMapping[index] = newColor;
+		ColorMapping[index] = event.target.value;
 		setOptions((previous) => [...previous]);
 	};
 
 	const colorCount = countUniquePairings(pairs2, options, uniquePairs);
 	const mappingCount = countMapping(colorCount);
+
+	const findBestOf = (count) => {
+		let best = calculateScore(Object.values(mappingCount)) || 100000;
+		if (isNaN(best)) best = 100000;
+		let bestPairs = [...pairs2];
+		console.log('BBBB best: ', best);
+		for (let i = 0; i < count; i++) {
+			const currentPairings = generatePairings2(uniquePairs);
+			const currentColorCount = countUniquePairings(currentPairings, options, uniquePairs);
+			const currentMappingCount = countMapping(currentColorCount);
+			const mappingValues = Object.values(currentMappingCount);
+			let score = calculateScore(mappingValues);
+			console.log('BBBB score: ', score);
+			if (score < best) {
+				console.log('BBBB ********************');
+				best = score;
+				bestPairs = currentPairings;
+			}
+		}
+		setPairs2(bestPairs);
+	};
 
 	return (
 		<div>
@@ -398,7 +446,7 @@ const Test = () => {
 
 			<FormControlLabel
 				control={
-					<Switch checked={showCustomOptions} onChange={handleChange(setShowCustomOptions)} />
+					<Switch checked={showCustomOptions} onChange={toggleValue(setShowCustomOptions)} />
 				}
 				label="Show Customization Options"
 			/>
@@ -433,7 +481,7 @@ const Test = () => {
 			<div>
 				<p></p>
 				<FormControlLabel
-					control={<Switch checked={showPairings} onChange={handleChange(setShowPairings)} />}
+					control={<Switch checked={showPairings} onChange={toggleValue(setShowPairings)} />}
 					label="Show Unique Pairings"
 				/>
 				<Collapse in={showPairings}>
@@ -446,7 +494,7 @@ const Test = () => {
 				</Collapse>
 				<FormControlLabel
 					control={
-						<Switch checked={showQuantityCount} onChange={handleChange(setShowQuantityCount)} />
+						<Switch checked={showQuantityCount} onChange={toggleValue(setShowQuantityCount)} />
 					}
 					label="Show Quantity Count"
 				/>
@@ -457,6 +505,18 @@ const Test = () => {
 							<b style={{ marginLeft: 10 }}>{key}</b>: {value}
 						</div>
 					))}
+					<Button onClick={() => findBestOf(attemptsCount)}>Optimize</Button>
+					<TextField
+						id="standard-number"
+						label="Number"
+						type="number"
+						InputLabelProps={{
+							shrink: true,
+						}}
+						variant="standard"
+						value={attemptsCount}
+						onChange={handleChange(setAttemptsCount)}
+					/>
 				</Collapse>
 			</div>
 			<Quilt2>
