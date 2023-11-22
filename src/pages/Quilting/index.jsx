@@ -367,7 +367,6 @@ const Test = () => {
 		});
 		setUniquePairs(newPairs);
 
-		console.log('BBBB ------------------------------');
 		const pairsResult2 = generatePairings2(newPairs);
 		setPairs2(pairsResult2);
 	}, [options]);
@@ -413,16 +412,13 @@ const Test = () => {
 		let best = calculateScore(Object.values(mappingCount)) || 100000;
 		if (isNaN(best)) best = 100000;
 		let bestPairs = [...pairs2];
-		console.log('BBBB best: ', best);
 		for (let i = 0; i < count; i++) {
 			const currentPairings = generatePairings2(uniquePairs);
 			const currentColorCount = countUniquePairings(currentPairings, options, uniquePairs);
 			const currentMappingCount = countMapping(currentColorCount);
 			const mappingValues = Object.values(currentMappingCount);
 			let score = calculateScore(mappingValues);
-			console.log('BBBB score: ', score);
 			if (score < best) {
-				console.log('BBBB ********************');
 				best = score;
 				bestPairs = currentPairings;
 			}
