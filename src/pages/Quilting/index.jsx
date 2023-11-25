@@ -312,11 +312,15 @@ const countUniquePairings = (pairings, options, uniquePairs) => {
 	});
 
 	pairings.forEach(([A, B]) => {
-		const one = uniquePairs.find(([a, b]) => a === A && b === B);
-		const two = uniquePairs.find(([a, b]) => a === B && b === A);
-		const keySet = one || two;
-		const key = `${keySet[0]} - ${keySet[1]}`;
-		pairsMapping[key] += 1;
+		try {
+			const one = uniquePairs.find(([a, b]) => a === A && b === B);
+			const two = uniquePairs.find(([a, b]) => a === B && b === A);
+			const keySet = one || two;
+			const key = `${keySet[0]} - ${keySet[1]}`;
+			pairsMapping[key] += 1;
+		} catch (e) {
+			console.error('Error counting pairings', e);
+		}
 	});
 
 	return pairsMapping;
@@ -340,6 +344,7 @@ const Test = () => {
 	const [showPairings, setShowPairings] = React.useState(false);
 	const [showQuantityCount, setShowQuantityCount] = React.useState(false);
 	const [attemptsCount, setAttemptsCount] = React.useState(10);
+	const [importing, setImporting] = React.useState(false);
 
 	const toggleValue = (setFunc) => () => {
 		setFunc((prev) => !prev);
@@ -367,22 +372,52 @@ const Test = () => {
 		});
 		setUniquePairs(newPairs);
 
-		const pairsResult2 = generatePairings2(newPairs);
-		setPairs2(pairsResult2);
+		if (!importing) {
+			const pairsResult2 = generatePairings2(newPairs);
+			setPairs2(pairsResult2);
+		}
+		setImporting(false);
 	}, [options]);
 
 	const exportPattern = () => {
-		const pattern = pairs2.map(([A, B]) => `${A}${B}`).join('');
-		console.log(pattern);
-		alert(pattern);
+		setImporting(true);
+		const patternString = pairs2.map(([A, B]) => `${A}:${B}-`).join('');
+		console.log('BBBB options, ColorMapping: ', options, ColorMapping);
+		const exportData = {
+			patternString,
+			options,
+			ColorMapping,
+		};
+		const exportString = JSON.stringify(exportData);
+		navigator.clipboard.writeText(exportString);
+		console.log(exportString);
+		alert('Copied to clipboard');
 	};
 	const importPattern = () => {
 		// const pattern =
 		// 	'123143542512314354651631423483587517614624625635471481287257658628725715871861263253458468762712827867163123427467362382527537134124527517314384581531234284586516214284481471276286486436231281432472176156457437831851832852154154257267863853876856354384281261463473176126327387481431435475123123427467462432735785623673478468562512713783612672578548543513613683812832536546743723625685864834136186785725425485364354152182685635431481';
 		const pattern = prompt('Enter Pattern');
 		const pairsResult = [];
-		for (let i = 0; i < pattern.length; i += 2) {
-			pairsResult.push([pattern[i], pattern[i + 1]]);
+
+		const parsedObject = JSON.parse(pattern);
+
+		if (typeof parsedObject === 'object') {
+			const { patternString, options: optionsObj, ColorMapping: ColorMappingObj } = parsedObject;
+
+			Object.entries(ColorMappingObj).forEach(([key, value]) => {
+				ColorMapping[key] = value;
+			});
+
+			setOptions(optionsObj);
+			const parsed = patternString.match(/(\d+):(\d+)-/g);
+			parsed.forEach((pair) => {
+				const [A, B] = pair.split(':');
+				pairsResult.push([A, B.split('-')[0]]);
+			});
+		} else {
+			for (let i = 0; i < pattern.length; i += 2) {
+				pairsResult.push([pattern[i], pattern[i + 1]]);
+			}
 		}
 		setPairs2(pairsResult);
 	};
@@ -391,7 +426,7 @@ const Test = () => {
 		setPairs2(pairsResult2);
 	};
 	const addOption = () => {
-		const newOption = options.length + 1;
+		const newOption = `${options.length + 1}`;
 		setOptions((previous) => [...previous, newOption]);
 		if (!ColorMapping[newOption]) ColorMapping[newOption] = 'orange';
 	};
