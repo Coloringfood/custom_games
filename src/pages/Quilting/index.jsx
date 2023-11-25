@@ -382,15 +382,14 @@ const Test = () => {
 	const exportPattern = () => {
 		setImporting(true);
 		const patternString = pairs2.map(([A, B]) => `${A}:${B}-`).join('');
-		console.log('BBBB options, ColorMapping: ', options, ColorMapping);
 		const exportData = {
 			patternString,
 			options,
 			ColorMapping,
 		};
 		const exportString = JSON.stringify(exportData);
-		navigator.clipboard.writeText(exportString);
 		console.log(exportString);
+		navigator.clipboard.writeText(exportString);
 		alert('Copied to clipboard');
 	};
 	const importPattern = () => {
