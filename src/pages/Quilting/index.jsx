@@ -73,6 +73,21 @@ const PairCount = styled.div`
 	width: 150px;
 `;
 
+function unsecuredCopyToClipboard(text) {
+	const textArea = document.createElement('textarea');
+	textArea.value = text;
+	document.body.appendChild(textArea);
+	textArea.focus();
+	textArea.select();
+	try {
+		document.execCommand('copy');
+		alert('Copied to clipboard');
+	} catch (err) {
+		console.error('Unable to copy to clipboard', err);
+	}
+	document.body.removeChild(textArea);
+}
+
 const calculateScore = (mappingValues) => {
 	let score = mappingValues.length;
 	// const lowest = _.min(mappingValues);
@@ -389,8 +404,13 @@ const Test = () => {
 		};
 		const exportString = JSON.stringify(exportData);
 		console.log(exportString);
-		navigator.clipboard.writeText(exportString);
-		alert('Copied to clipboard');
+		try {
+			navigator.clipboard.writeText(exportString);
+			alert('Copied to clipboard');
+		} catch (e) {
+			console.error('Unable to copy to clipboard trying backup method', e);
+			unsecuredCopyToClipboard(exportString);
+		}
 	};
 	const importPattern = () => {
 		// const pattern =
