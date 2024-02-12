@@ -22,13 +22,40 @@ export default function traverseMaze3D(maze) {
 		} = maze[y][x][z];
 		if (currentLocation === end) {
 			console.log('Made it to the end of the maze!');
+			return previousLocations;
 		}
 		console.log(`BBBB currentLocation ${currentLocation}: previousLocations: ${previousLocations}`);
 		console.log(
 			`BBBB northWall: ${northWall}, southWall: ${southWall}, eastWall: ${eastWall}, westWall: ${westWall}, upWall: ${upWall}, downWall: ${downWall}`,
 		);
 
-		return [];
+		let path = [];
+		if (!northWall && !previousLocations.includes(`${x},${y - 1},${z}`)) {
+			const pathn = traverseMaze(x, y - 1, z, [...previousLocations, currentLocation]);
+			if (pathn.length) path = pathn;
+		}
+		if (!southWall && !previousLocations.includes(`${x},${y + 1},${z}`)) {
+			const paths = traverseMaze(x, y + 1, z, [...previousLocations, currentLocation]);
+			if (paths.length) path = paths;
+		}
+		if (!eastWall && !previousLocations.includes(`${x + 1},${y},${z}`)) {
+			const pathe = traverseMaze(x + 1, y, z, [...previousLocations, currentLocation]);
+			if (pathe.length) path = pathe;
+		}
+		if (!westWall && !previousLocations.includes(`${x - 1},${y},${z}`)) {
+			const pathw = traverseMaze(x - 1, y, z, [...previousLocations, currentLocation]);
+			if (pathw.length) path = pathw;
+		}
+		if (!upWall && !previousLocations.includes(`${x},${y},${z + 1}`)) {
+			const pathu = traverseMaze(x, y, z + 1, [...previousLocations, currentLocation]);
+			if (pathu.length) path = pathu;
+		}
+		if (!downWall && !previousLocations.includes(`${x},${y},${z - 1}`)) {
+			const pathd = traverseMaze(x, y, z - 1, [...previousLocations, currentLocation]);
+			if (pathd.length) path = pathd;
+		}
+
+		return path;
 	};
 	const path = traverseMaze(0, 0, 0, []);
 
