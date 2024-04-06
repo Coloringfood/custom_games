@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styledC from 'styled-components';
 
-import generateMaze from '@/pages/Maze/generateMaze.js';
-import traverseMaze from '@/pages/Maze/traverseMaze.js';
+import generateMaze from '#/pages/Maze/generateMaze.js';
+import traverseMaze from '#/pages/Maze/traverseMaze.js';
 
 const MazeWrapper = styledC.div`
   width: 100%;

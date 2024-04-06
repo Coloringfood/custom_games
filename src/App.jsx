@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { purple } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
-import AppRouter from '@/AppRouter.jsx';
+import AppRouter from '#/AppRouter.jsx';
 const darkTheme = createTheme({
 	palette: {
 		// mode: 'dark',

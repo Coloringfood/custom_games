@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button } from '@mui/material';
 import _ from 'lodash';
-import GameModal from '@/components/GameModal.jsx';
+import GameModal from '#/components/GameModal.jsx';
 import styled from 'styled-components';
 
 const CustomTable = styled.table`

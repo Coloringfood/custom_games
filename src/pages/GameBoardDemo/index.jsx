@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './Game.css';
-import PlayerBoard from '@/pages/GameBoardDemo/components/PlayerBoard.jsx';
+import PlayerBoard from '#/pages/GameBoardDemo/components/PlayerBoard.jsx';
 
 const Game = ({ user }) => {
 	const [players, setPlayers] = useState([]);

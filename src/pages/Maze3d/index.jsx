@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styledC from 'styled-components';
 
-import generateMaze3D from '@/pages/Maze3d/generateMaze3D.js';
-import traverseMaze3D from '@/pages/Maze3d/traverseMaze3D.js';
+import generateMaze3D from '#/pages/Maze3d/generateMaze3D.js';
+import traverseMaze3D from '#/pages/Maze3d/traverseMaze3D.js';
 
 const MazeWrapper = styledC.div`
   width: 100%;

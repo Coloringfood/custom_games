@@ -4,11 +4,11 @@ import _ from 'lodash';
 import { Button } from '@mui/material';
 import styled from 'styled-components';
 
-import { genenerateDeck } from '@/Utilities/deck.js';
-import DeckCard from '@/components/DeckCard.jsx';
-import GameModal from '@/components/GameModal.jsx';
+import { genenerateDeck } from '#/Utilities/deck.js';
+import DeckCard from '#/components/DeckCard.jsx';
+import GameModal from '#/components/GameModal.jsx';
 
-import getLowestScore from '@/pages/FiveCrowns/getLowestScore';
+import getLowestScore from '#/pages/FiveCrowns/getLowestScore';
 
 //region Styled Components
 const PlayingTable = styled.div`

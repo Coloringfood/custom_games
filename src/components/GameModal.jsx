@@ -11,33 +11,15 @@ import {
 	FormGroup,
 } from '@mui/material';
 import styledC from 'styled-components';
-import dataStore from '@/Utilities/dataStore.js';
-import MulitDropdown from '@/components/MulitDropdown.jsx';
+import dataStore from '#/Utilities/dataStore.js';
+import MulitDropdown from '#/components/MulitDropdown.jsx';
 import PropTypes from 'prop-types';
-import AdjustPlayersModal from '@/components/AdjustPlayersModal.jsx';
+import AdjustPlayersModal from '#/components/AdjustPlayersModal.jsx';
 import { CheckBox } from '@mui/icons-material';
-
-export const style = {
-	position: 'absolute',
-	top: '50%',
-	left: '50%',
-	transform: 'translate(-50%, -50%)',
-	width: 500,
-	bgcolor: 'background.paper',
-	border: '2px solid #000',
-	boxShadow: 24,
-	p: 4,
-};
+import { style, ButtonWrapper } from '#/components/styledComponents.jsx';
 
 const AdjustWrapper = styledC.span`
 	float: right;
-`;
-export const ButtonWrapper = styledC.span`
-	float: right;
-	margin-top: 20px;
-	& > button {
-		margin-left: 10px;
-	}
 `;
 
 function GameModal({ onStartGame, setModalOpen, modalOpen }) {

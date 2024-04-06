@@ -9,6 +9,7 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { Container } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import {
 	BrowserRouter as Router,
 	Routes,
@@ -19,19 +20,18 @@ import {
 } from 'react-router-dom';
 
 // Pages Import
-import Login from '@/pages/Login/index.jsx';
-import Default from '@/pages/Default/index.jsx';
-import NotFound from '@/pages/NotFound/index.jsx';
-import GameBoardDemo from '@/pages/GameBoardDemo/index.jsx';
-import GamesList from '@/pages/GameList/index.jsx';
-import GameScorer from '@/pages/GameScorer/index.jsx';
-import Maze from '@/pages/Maze/index.jsx';
-import { styled } from '@mui/material/styles';
-import FiveCrowns from '@/pages/FiveCrowns/index.jsx';
-import Maze3d from '@/pages/Maze3d/index.jsx';
-import Sudoku from '@/pages/Sudoku/index.jsx';
-import Test from '@/pages/Test/index.jsx';
-import Quilting from '@/pages/Quilting/index.jsx';
+import Login from '#/pages/Login/index.jsx';
+import Default from '#/pages/Default/index.jsx';
+import NotFound from '#/pages/NotFound/index.jsx';
+import GameBoardDemo from '#/pages/GameBoardDemo/index.jsx';
+import GamesList from '#/pages/GameList/index.jsx';
+import GameScorer from '#/pages/GameScorer/index.jsx';
+import Maze from '#/pages/Maze/index.jsx';
+import FiveCrowns from '#/pages/FiveCrowns/index.jsx';
+import Maze3d from '#/pages/Maze3d/index.jsx';
+import Sudoku from '#/pages/Sudoku/index.jsx';
+import Test from '#/pages/Test/index.jsx';
+import Quilting from '#/pages/Quilting/index.jsx';
 
 // Styled Components
 const StyledNav = styled(NavLink)`
