@@ -1,5 +1,6 @@
 import _ from 'lodash';
-const defaultSuits = ['hearts', 'spades', 'clubs', 'diamonds'];
+const suits = ['hearts', 'spades', 'clubs', 'diamonds', 'stars', 'suns', 'moons', 'clovers'];
+const defaultSuits = suits.slice(0, 4);
 const defaultValues = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 /**
  * @typedef {Object} PlayingCard
@@ -9,6 +10,7 @@ const defaultValues = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
 /**
  * Generate a deck of cards
+ * @example genenerateDeck(['hearts', 'spades', 'clubs', 'diamonds'], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 2)
  * @param suits
  * @param values
  * @param numberOfJokers
@@ -38,4 +40,4 @@ const genenerateDeck = (suits = defaultSuits, values = defaultValues, numberOfJo
 	return _.shuffle(deck);
 };
 
-export { genenerateDeck };
+export { genenerateDeck, suits };

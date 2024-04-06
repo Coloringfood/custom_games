@@ -14,6 +14,10 @@ const getSuitColor = (suit) => {
 			return '#000';
 		case 'stars':
 			return '#bb0';
+		case 'suns':
+			return '#ff9';
+		case 'moons':
+			return '#bbf';
 		case 'clovers':
 			return '#0b0';
 		default:
