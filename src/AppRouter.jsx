@@ -31,6 +31,7 @@ import FiveCrowns from '#/pages/FiveCrowns/index.jsx';
 import Maze3d from '#/pages/Maze3d/index.jsx';
 import Sudoku from '#/pages/Sudoku/index.jsx';
 import Test from '#/pages/Test/index.jsx';
+import Cruise from '#/pages/Cruise/index.jsx';
 import Quilting from '#/pages/Quilting/index.jsx';
 
 // Styled Components
@@ -162,6 +163,7 @@ const AppRouter = () => {
 					<Route path="/home" element={<Default />} />
 					<Route path="/scorer" element={<GameScorer />} />
 					<Route path="/test" element={<Test />} />
+					<Route path="/cruise" element={<Cruise />} />
 					<Route path="/quilting" element={<Quilting />} />
 					<Route
 						path="/profile"
