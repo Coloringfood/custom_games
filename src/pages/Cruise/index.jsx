@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import './Default.css';
 import PriceHistoryModal from '#/pages/Cruise/PriceHistoryModal.jsx';
+import DynamicViewingGraph from '#/pages/Cruise/DynamicViewingGraph.jsx';
 import {
 	mapShipNames,
 	flatDataColumns,
@@ -12,7 +13,7 @@ import {
 	dateStringModifiers,
 } from '#/pages/Cruise/cruiseUtils.js';
 
-const DisplayOptions = ['days', 'events', 'cruise'];
+const DisplayOptions = ['days', 'events', 'cruise', 'graph'];
 
 function Default() {
 	const [loading, setLoading] = useState(true);
@@ -235,6 +236,12 @@ function Default() {
 							sx={{ border: 0 }}
 						/>
 					</Paper>
+				);
+			case 'graph':
+				return (
+					<div>
+						<DynamicViewingGraph data={data} />
+					</div>
 				);
 			default:
 				return null;
