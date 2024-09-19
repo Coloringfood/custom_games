@@ -5,35 +5,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import './Default.css';
 import PriceHistoryModal from '#/pages/Cruise/PriceHistoryModal.jsx';
+import {
+	mapShipNames,
+	flatDataColumns,
+	initialState,
+	dateStringModifiers,
+} from '#/pages/Cruise/cruiseUtils.js';
 
-const flatDataColumns = [
-	{ field: 'name', headerName: 'Name', width: 300 },
-	{ field: 'shipName', headerName: 'Ship Name', width: 200 },
-	{ field: 'dateCollected', headerName: 'Date Collected', width: 200 },
-	{ field: 'startDate', headerName: 'Start Date', width: 200 },
-	{ field: 'cheapestPrice', headerName: 'Cheapest Price', width: 100 },
-	{ field: 'endDate', headerName: 'End Date', width: 200 },
-	{ field: 'interiorPrice', headerName: 'Interior Price', width: 100 },
-	{ field: 'oceanViewPrice', headerName: 'Ocean View Price', width: 100 },
-	{ field: 'verandahPrice', headerName: 'Verandah Price', width: 100 },
-	{ field: 'conciergePrice', headerName: 'Concierge Price', width: 100 },
-	{ field: 'destinations', headerName: 'Destinations', width: 400 },
-];
-const paginationModel = { page: 0, pageSize: 5 };
-const sortModel = [{ field: 'cheapestPrice', sort: 'asc' }];
-const columnVisibilityModel = {
-	endDate: false,
-	interiorPrice: false,
-	oceanViewPrice: false,
-	verandahPrice: false,
-	conciergePrice: false,
-};
-const initialState = {
-	pagination: { paginationModel },
-	sorting: { sortModel },
-	columns: { columnVisibilityModel },
-};
-const dateStringModifiers = ['en-us', { hour: '2-digit', minute: '2-digit' }];
 const DisplayOptions = ['days', 'events', 'cruise'];
 
 function Default() {
@@ -216,7 +194,7 @@ function Default() {
 									field: 'cruiseName',
 									headerName: 'Cruise Ship',
 									width: 300,
-									valueFormatter: (value) => value.split(' - ')[0],
+									valueFormatter: (value) => mapShipNames(value.split(' - ')[0]),
 								},
 								{
 									field: 'startDate',

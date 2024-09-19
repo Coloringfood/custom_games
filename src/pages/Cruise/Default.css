@@ -53,3 +53,6 @@
 .MuiDataGrid-scrollbar {
   left: 0;
 }
+.MuiDataGrid-scrollbar--vertical{
+    display: none !important;
+}

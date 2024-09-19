@@ -5,8 +5,9 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import PropTypes from 'prop-types';
 import { style, ButtonWrapper } from '#/components/styledComponents.jsx';
 import _ from 'lodash';
+import { mapShipNames } from '#/pages/Cruise/cruiseUtils.js';
 
-const paginationModel = { page: 0, pageSize: 5 };
+const paginationModel = { page: 0, pageSize: 3 };
 const sortModel = [{ field: 'cheapestPrice', sort: 'asc' }];
 const columnVisibilityModel = {
 	endDate: false,
@@ -23,7 +24,7 @@ const initialState = {
 
 const flatDataColumns = [
 	{ field: 'name', headerName: 'Name', width: 300 },
-	{ field: 'shipName', headerName: 'Ship Name', width: 200 },
+	{ field: 'shipName', headerName: 'Ship Name', width: 200, valueFormatter: mapShipNames },
 	{ field: 'dateCollected', headerName: 'Date Collected', width: 200 },
 	{ field: 'startDate', headerName: 'Start Date', width: 200 },
 	{ field: 'cheapestPrice', headerName: 'Cheapest Price', width: 100 },
@@ -75,7 +76,7 @@ function GameModal({ cruise = {}, setModalOpen, modalOpen }) {
 			aria-labelledby="modal-modal-title"
 			aria-describedby="modal-modal-description"
 		>
-			<Box sx={{ ...style, width: 1200 }}>
+			<Box sx={{ ...style, width: 800 }}>
 				<Typography id="modal-modal-title" variant="h6" component="h2">
 					Viewing Cruise: {_.get(cruise, 'cruiseName', 'Unknown')}
 				</Typography>
@@ -88,7 +89,7 @@ function GameModal({ cruise = {}, setModalOpen, modalOpen }) {
 						rows={_.get(cruise, 'priceHistory', [])}
 						columns={flatDataColumns}
 						initialState={initialState}
-						pageSizeOptions={[5, 10, 30, 50, 100]}
+						pageSizeOptions={[3, 5, 10, 30, 50, 100]}
 						checkboxSelection
 						sx={{ border: 0 }}
 					/>
