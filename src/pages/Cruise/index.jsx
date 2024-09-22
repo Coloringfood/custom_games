@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import Paper from '@mui/material/Paper';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
+import { Paper, Box, Button, CircularProgress } from '@mui/material';
 import './Default.css';
 import PriceHistoryModal from '#/pages/Cruise/PriceHistoryModal.jsx';
 import DynamicViewingGraph from '#/pages/Cruise/DynamicViewingGraph.jsx';
@@ -11,6 +9,8 @@ import {
 	flatDataColumns,
 	initialState,
 	dateStringModifiers,
+	groupData,
+	fetchCruiseData,
 } from '#/pages/Cruise/cruiseUtils.js';
 
 const DisplayOptions = ['days', 'events', 'cruise', 'graph'];
@@ -18,7 +18,7 @@ const DisplayOptions = ['days', 'events', 'cruise', 'graph'];
 function Default() {
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState([]);
-	const [viewing, setViewing] = useState('cruise');
+	const [viewing, setViewing] = useState('graph');
 	const [pulledDays, setPulledDays] = useState([]);
 	const [pulledEvents, setPulledEvents] = useState([]);
 	const [cruiseData, setCruiseData] = useState([]);
@@ -27,115 +27,29 @@ function Default() {
 
 	// on page load get data from API
 	useEffect(() => {
-		fetch('http://api.timaeustech.com/cruise?flat=true')
-			.then((res) => res.json())
-			.then((response) => {
-				setData(response.data.entries);
-				setLoading(false);
-			});
+		(async () => {
+			const newData = await fetchCruiseData({ flat: true });
+			setData(newData);
+			setLoading(false);
+		})();
 	}, []);
 
 	// whenever data updates, pull out parsed data
 	useEffect(() => {
-		const days = {};
-		const events = [];
-		const cruises = {};
+		const {
+			days: newPulledDays,
+			events: newPulledEvents,
+			cruises: newPulledCruises,
+		} = groupData(data);
 
-		data.forEach((entry, index) => {
-			entry.id = index;
-			const {
-				name,
-				shipName,
-				dateCollected,
-				startDate,
-				endDate,
-				interiorPrice,
-				oceanViewPrice,
-				verandahPrice,
-				conciergePrice,
-				destinations,
-			} = entry;
-			const day = new Date(dateCollected).toLocaleDateString();
-			const cheapestPrice = Math.min(
-				interiorPrice || 99999,
-				oceanViewPrice || 99999,
-				verandahPrice || 99999,
-				conciergePrice || 99999,
-			);
-			const cruiseData = {
-				name,
-				shipName,
-				dateCollected: new Date(dateCollected).toLocaleDateString(...dateStringModifiers),
-				startDate: new Date(startDate).toLocaleDateString(...dateStringModifiers),
-				cheapestPrice,
-				endDate: new Date(endDate).toLocaleDateString(...dateStringModifiers),
-				interiorPrice,
-				oceanViewPrice,
-				verandahPrice,
-				conciergePrice,
-				destinations,
-				id: index,
-			};
-
-			// check if this event is already added, if not add it
-			const eventIndex = events.findIndex((event) => event.dateCollected === dateCollected);
-			if (eventIndex === -1) {
-				events.push({
-					dateCollected,
-					indexes: [index],
-				});
-			} else {
-				events[eventIndex].indexes.push(index);
-			}
-
-			// Check if this day is already in the days array
-			if (days[day] === undefined) {
-				days[day] = {
-					day,
-					ships: [],
-				};
-			}
-			days[day].ships.push(cruiseData);
-
-			const cruiseName = `${shipName} - ${new Date(startDate).toLocaleDateString()}`;
-			if (cruises[cruiseName] === undefined) {
-				cruises[cruiseName] = {
-					id: cruiseName,
-					cruiseName,
-					startDate: new Date(startDate).toLocaleDateString(),
-					events: 0,
-					changes: 0,
-					cheapestPrice: 99999,
-					priceHistory: [],
-				};
-			}
-			cruises[cruiseName].priceHistory.push(cruiseData);
-			cruises[cruiseName].events += 1;
-			cruises[cruiseName].cheapestPrice = Math.min(
-				cruises[cruiseName].cheapestPrice,
-				cheapestPrice,
-			);
-			cruises[cruiseName].changes = calculatePriceHistoryChanges(cruises[cruiseName].priceHistory);
-		});
-
-		const daysArray = Object.keys(days).map((key) => days[key]);
-		setPulledDays(daysArray.sort((a, b) => new Date(b.day) - new Date(a.day)));
-		setPulledEvents(events.sort((a, b) => new Date(b.dateCollected) - new Date(a.dateCollected)));
-		const cruiseArray = Object.keys(cruises).map((key) => cruises[key]);
-		setCruiseData(cruiseArray.sort((a, b) => new Date(b.startDate) - new Date(a.startDate)));
+		setPulledDays(newPulledDays);
+		setPulledEvents(newPulledEvents);
+		setCruiseData(newPulledCruises);
 	}, [data]);
 
 	const showPriceHistoryModal = (cruise) => {
 		setModalOpen(true);
 		setModalCruise(cruise);
-	};
-
-	const calculatePriceHistoryChanges = (priceHistory) => {
-		const values = new Set();
-		priceHistory.reduce((acc, cruise) => {
-			values.add(cruise.cheapestPrice);
-		});
-		return values.size;
 	};
 
 	const renderViewingGraphs = () => {
@@ -165,7 +79,6 @@ function Default() {
 					<div>
 						{pulledEvents.map((event) => {
 							const rows = event.indexes.map((index) => data[index] || {});
-							console.log('BBBB rows: ', rows);
 							return (
 								<div key={event.dateCollected} className="event">
 									<h3>
@@ -201,6 +114,9 @@ function Default() {
 									field: 'startDate',
 									headerName: 'Sailing Date',
 									width: 200,
+									valueGetter: (value) => new Date(value),
+									valueFormatter: (value) => value.toLocaleDateString(),
+									type: 'dateTime',
 								},
 								{
 									field: 'events',
@@ -240,7 +156,12 @@ function Default() {
 			case 'graph':
 				return (
 					<div>
-						<DynamicViewingGraph data={data} />
+						<DynamicViewingGraph
+							data={data}
+							pulledCruises={cruiseData}
+							pulledDays={pulledDays}
+							pulledEvents={pulledEvents}
+						/>
 					</div>
 				);
 			default:
@@ -253,11 +174,17 @@ function Default() {
 			<PriceHistoryModal cruise={modalCruise} setModalOpen={setModalOpen} modalOpen={modalOpen} />
 			<p>This is for me to view the cruise data in pretty graphs</p>
 			<h1>Cruise</h1>
-			<div>
+			<div style={{ paddingBottom: '20px' }}>
 				{DisplayOptions.map((option) => (
-					<button key={option} disabled={viewing === option} onClick={() => setViewing(option)}>
+					<Button
+						sx={{ m: 1 }}
+						variant="contained"
+						key={option}
+						disabled={viewing === option}
+						onClick={() => setViewing(option)}
+					>
 						{option}
-					</button>
+					</Button>
 				))}
 			</div>
 			{loading ? (
