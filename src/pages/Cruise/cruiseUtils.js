@@ -14,6 +14,13 @@ export const fetchCruiseData = async (filters) => {
 		});
 };
 
+export const fetchTodaysBest = async () => {
+	const url = `${BASE_URL}/daily?notify=false`;
+	return fetch(url)
+		.then((res) => res.json())
+		.then((response) => response.data);
+};
+
 export const SHIP_NAMES_MAPPING = {
 	ShipLogo_DisneyFantasy: 'Disney Fantasy',
 	ShipLogo_DisneyMagic: 'Disney Magic',

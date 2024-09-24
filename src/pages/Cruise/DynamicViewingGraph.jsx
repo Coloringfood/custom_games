@@ -78,7 +78,7 @@ Get the onMarkClick to open that point's data in a modal.
  */
 
 const DynamicViewingGraph = () => {
-	// const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [pulledCruises, setPulledCruises] = useState([]);
 	const [grouping, setGrouping] = useState('cruise');
 	const [focusOption, setFocusOption] = useState('cheapestPrice');
@@ -92,7 +92,8 @@ const DynamicViewingGraph = () => {
 	const [cruiseNames, setCruiseNames] = useState([]);
 
 	const fetchData = async () => {
-		// setLoading(true);
+		if (loading) return;
+		setLoading(true);
 		let cleanedFilters = _.cloneDeep(filters);
 		Object.keys(cleanedFilters).forEach((key) => {
 			if (cleanedFilters[key]?.length === 0 || !cleanedFilters[key]) {
@@ -105,7 +106,7 @@ const DynamicViewingGraph = () => {
 		const data = await fetchCruiseData(cleanedFilters);
 		const { cruises } = groupData(data);
 		setPulledCruises(cruises);
-		// setLoading(false);
+		setLoading(false);
 	};
 
 	useEffect(() => {
