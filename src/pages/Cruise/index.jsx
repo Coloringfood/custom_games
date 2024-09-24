@@ -193,14 +193,7 @@ function Default() {
 						<p>
 							{todaysTop?.message
 								.split('\n')
-								.map((a, i) => {
-									a.key = i;
-									return [a, <br key={i + '_'} />];
-								})
-								.map((a, i) => {
-									a.key = i;
-									return a;
-								})}
+								.map((a, i) => [<span key={i}>{a}</span>, <br key={i + '_'} />])}
 						</p>
 						<p>Ship: {mapShipNames(todaysTop.bestDate.lowestValue.name)}</p>
 						<p>Desitnations: {todaysTop.bestDate.destinations}</p>
