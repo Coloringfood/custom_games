@@ -11,6 +11,7 @@ import {
 	ToggleButton,
 	Slider,
 	Modal,
+	TextField,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { DatePicker } from '@mui/x-date-pickers';
@@ -59,23 +60,49 @@ const FOCUS_OPTIONS_NAME_MAPPING = {
 
 const minDistance = 500;
 
-/*
-// TO  DO Ideas:
-X axis options
-(Can be by Lowest, or by average)
-- Show by day of week price changes
-- Show by day of month
-- Show by month
+class CustomLineWrapper extends React.PureComponent {
+	shouldComponentUpdate(nextProps) {
+		if (
+			!_.isEqual(this.props.xLabels, nextProps.xLabels) ||
+			!_.isEqual(this.props.sliderValues, nextProps.sliderValues) ||
+			!_.isEqual(this.props.series, nextProps.series)
+		) {
+			return true;
+		}
+		return false;
+	}
+	render() {
+		console.log('BBBB ------------------------------');
+		return (
+			<Stack direction="row" spacing={2}>
+				<LineChart
+					xAxis={[{ scaleType: 'point', data: this.props.xLabels }]}
+					yAxis={[
+						{
+							scaleType: 'linear',
+							min: this.props.sliderValues[0],
+							max: this.props.sliderValues[1],
+						},
+					]}
+					series={this.props.series}
+					height={400}
+					margin={{ top: 10, bottom: 20 }}
+					tooltip={{ trigger: 'item' }}
+					slotProps={{ legend: { hidden: true } }}
+					onMarkClick={this.props.handleMarkClick}
+					skipAnimation
+				/>
+			</Stack>
+		);
+	}
+}
 
-Filter down Ideas
-- Specific Cruise
-- Specific Ship
-- Specific Destination (or group of destinations)
-
-// TO  DO:
-Get the onMarkClick to open that point's data in a modal.
-
- */
+CustomLineWrapper.propTypes = {
+	handleMarkClick: PropTypes.func.isRequired,
+	xLabels: PropTypes.array.isRequired,
+	sliderValues: PropTypes.array.isRequired,
+	series: PropTypes.array.isRequired,
+};
 
 const DynamicViewingGraph = () => {
 	const [loading, setLoading] = useState(false);
@@ -174,6 +201,16 @@ const DynamicViewingGraph = () => {
 		} else {
 			setSliderValues(newValue);
 		}
+	};
+
+	const handleMinValueChange = (event) => {
+		const value = parseInt(event.target.value, 10);
+		setSliderValues([value, sliderValues[1]]);
+	};
+
+	const handleMaxValueChange = (event) => {
+		const value = parseInt(event.target.value, 10);
+		setSliderValues([sliderValues[0], value]);
 	};
 
 	const handleMarkClick = (event, clickData) => {
@@ -395,6 +432,24 @@ const DynamicViewingGraph = () => {
 			</Paper>
 			<Divider />
 			<Paper variant="outlined" sx={{ p: 3 }}>
+				<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+					<TextField
+						label="Min Value"
+						type="number"
+						value={sliderValues[0]}
+						onChange={handleMinValueChange}
+						variant="outlined"
+						size="small"
+					/>
+					<TextField
+						label="Max Value"
+						type="number"
+						value={sliderValues[1]}
+						onChange={handleMaxValueChange}
+						variant="outlined"
+						size="small"
+					/>
+				</Box>
 				<Slider
 					value={sliderValues}
 					onChange={handleSliderChange}
@@ -402,19 +457,12 @@ const DynamicViewingGraph = () => {
 					min={3000}
 					max={90000}
 				/>
-				<Stack direction="row" spacing={2}>
-					<LineChart
-						xAxis={[{ scaleType: 'point', data: xLabels }]}
-						yAxis={[{ scaleType: 'linear', min: sliderValues[0], max: sliderValues[1] }]}
-						series={series}
-						height={400}
-						margin={{ top: 10, bottom: 20 }}
-						tooltip={{ trigger: 'item' }}
-						slotProps={{ legend: { hidden: true } }}
-						onMarkClick={handleMarkClick}
-						skipAnimation
-					/>
-				</Stack>
+				<CustomLineWrapper
+					xLabels={xLabels}
+					sliderValues={sliderValues}
+					handleMarkClick={handleMarkClick}
+					series={series}
+				/>
 			</Paper>
 		</Box>
 	);
