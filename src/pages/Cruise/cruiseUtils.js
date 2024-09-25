@@ -77,6 +77,7 @@ export const groupData = (data) => {
 
 	data.forEach((entry, index) => {
 		entry.id = index;
+
 		const {
 			name,
 			shipName,
@@ -96,6 +97,7 @@ export const groupData = (data) => {
 			verandahPrice || 99999,
 			conciergePrice || 99999,
 		);
+		entry.cheapestPrice = cheapestPrice;
 		const cruiseData = {
 			name,
 			shipName,
@@ -164,6 +166,7 @@ export const groupData = (data) => {
 
 export default {
 	fetchCruiseData,
+	fetchTodaysBest,
 	mapShipNames,
 	flatDataColumns,
 	initialState,

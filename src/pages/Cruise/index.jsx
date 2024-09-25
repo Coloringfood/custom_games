@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
 import { Paper, Box, Button, CircularProgress } from '@mui/material';
 import './Default.css';
 import PriceHistoryModal from '#/pages/Cruise/PriceHistoryModal.jsx';
-import DynamicViewingGraph from '#/pages/Cruise/DynamicViewingGraph.jsx';
+import DynamicViewingGraph from '#/pages/Cruise/SubPages/DynamicViewingGraph.jsx';
 import {
 	mapShipNames,
 	flatDataColumns,
-	initialState,
-	dateStringModifiers,
 	groupData,
 	fetchCruiseData,
 	fetchTodaysBest,
 } from '#/pages/Cruise/cruiseUtils.js';
+import DaysGraph from '#/pages/Cruise/SubPages/DaysGraph.jsx';
+import EventsGraph from '#/pages/Cruise/SubPages/EventsGraph.jsx';
+import CruiseGraph from '#/pages/Cruise/SubPages/CruiseGraph.jsx';
 
 const DisplayOptions = ['days', 'events', 'cruise', 'graph'];
 
@@ -58,121 +58,28 @@ function Default() {
 
 	const getTodaysTop = async () => {
 		const response = await fetchTodaysBest();
-		console.info("BBBB Today's Best response: ", response);
+		console.info(`BBBB Today's Best response: ${response}`);
 		setTodaysTop(response);
 	};
 
 	const renderViewingGraphs = () => {
 		switch (viewing) {
 			case 'days':
-				return (
-					<div>
-						{pulledDays.map((day) => (
-							<div key={day.day} className="day">
-								<h3>Day {day.day}</h3>
-								<div>Ships found: {day.ships.length}</div>
-								<Paper>
-									<DataGrid
-										rows={day.ships}
-										columns={flatDataColumns}
-										initialState={initialState}
-										pageSizeOptions={[5, 10, 30, 50, 100]}
-										sx={{ border: 0 }}
-									/>
-								</Paper>
-							</div>
-						))}
-					</div>
-				);
+				return <DaysGraph pulledDays={pulledDays} flatDataColumns={flatDataColumns} />;
 			case 'events':
-				return (
-					<div>
-						{pulledEvents.map((event) => {
-							const rows = event.indexes.map((index) => data[index] || {});
-							return (
-								<div key={event.dateCollected} className="event">
-									<h3>
-										{new Date(event.dateCollected).toLocaleDateString(...dateStringModifiers)}
-									</h3>
-									<div>Events found: {event.indexes.length}</div>
-									<Paper>
-										<DataGrid
-											columns={flatDataColumns}
-											rows={rows}
-											initialState={initialState}
-											pageSizeOptions={[5, 10, 30, 50, 100]}
-											sx={{ border: 0 }}
-										/>
-									</Paper>
-								</div>
-							);
-						})}
-					</div>
-				);
+				return <EventsGraph pulledEvents={pulledEvents} data={data} />;
 			case 'cruise':
 				return (
-					<Paper>
-						<DataGrid
-							columns={[
-								{
-									field: 'cruiseName',
-									headerName: 'Cruise Ship',
-									width: 300,
-									valueFormatter: (value) => mapShipNames(value.split(' - ')[0]),
-								},
-								{
-									field: 'startDate',
-									headerName: 'Sailing Date',
-									width: 200,
-									valueGetter: (value) => new Date(value),
-									valueFormatter: (value) => value.toLocaleDateString(),
-									type: 'dateTime',
-								},
-								{
-									field: 'events',
-									headerName: 'Events',
-									width: 100,
-								},
-								{
-									field: 'changes',
-									headerName: 'Changes',
-									width: 100,
-								},
-								{
-									field: 'cheapestPrice',
-									headerName: 'Cheapest Price',
-									width: 200,
-								},
-								{
-									field: 'actions',
-									headerName: 'Actions',
-									width: 200,
-									renderCell: (params) => (
-										<button onClick={() => showPriceHistoryModal(params.row)}>
-											View price history
-										</button>
-									),
-								},
-							]}
-							rows={cruiseData}
-							pageSizeOptions={[5, 10, 30, 50, 100]}
-							initialState={{
-								sorting: { sortModel: [{ field: 'startDate', sort: 'desc' }] },
-							}}
-							sx={{ border: 0 }}
-						/>
-					</Paper>
+					<CruiseGraph cruiseData={cruiseData} showPriceHistoryModal={showPriceHistoryModal} />
 				);
 			case 'graph':
 				return (
-					<div>
-						<DynamicViewingGraph
-							data={data}
-							pulledCruises={cruiseData}
-							pulledDays={pulledDays}
-							pulledEvents={pulledEvents}
-						/>
-					</div>
+					<DynamicViewingGraph
+						data={data}
+						pulledCruises={cruiseData}
+						pulledDays={pulledDays}
+						pulledEvents={pulledEvents}
+					/>
 				);
 			default:
 				return null;
