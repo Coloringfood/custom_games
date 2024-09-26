@@ -23,8 +23,8 @@ const GROUP_BY_OPTIONS = ['collectionDate', 'weekday', 'monthday', 'month'];
 const GROUP_OPTIONS_NAME_MAPPING = {
 	collectionDate: 'Price per Collection Date',
 	weekday: 'Price per Weekday Purchased on',
-	monthday: 'Price per Monthday Purchased on',
-	month: 'Price per Month Purchased on',
+	monthday: 'Price per Day of month Purchased on',
+	month: 'Price per Month Purchased during',
 };
 const X_AXIS_OPTIONS_VARIATIONS = ['lowest', 'average'];
 
@@ -44,11 +44,11 @@ const FOCUS_OPTIONS = [
 	'conciergePrice',
 ];
 const FOCUS_OPTIONS_NAME_MAPPING = {
-	cheapestPrice: 'Cheapest Price',
-	interiorPrice: 'Interior Price',
-	oceanViewPrice: 'Ocean View Price',
-	verandahPrice: 'Verandah Price',
-	conciergePrice: 'Concierge Price',
+	cheapestPrice: 'Cheapest Room Price',
+	interiorPrice: 'Interior Room  Price',
+	oceanViewPrice: 'Ocean View Room Price',
+	verandahPrice: 'Verandah Room Price',
+	conciergePrice: 'Concierge Room Price',
 };
 
 const minDistance = 500;
@@ -65,7 +65,6 @@ class CustomLineWrapper extends React.Component {
 		return false;
 	}
 	render() {
-		console.log('BBBB ------------------------------');
 		return (
 			<Stack direction="row" spacing={2}>
 				<LineChart
@@ -325,7 +324,7 @@ const DynamicViewingGraph = () => {
 			</Modal>
 			<Paper elevation={3} sx={{ p: 2 }}>
 				<Box>
-					<Typography>Select which property to view in graph.</Typography>
+					<Typography>Select which price option to view in graph.</Typography>
 					<ToggleButtonGroup
 						color="primary"
 						value={filters.focusOption}
@@ -356,22 +355,24 @@ const DynamicViewingGraph = () => {
 						))}
 					</ToggleButtonGroup>
 				</Box>
-				<Box>
-					<Typography sx={{ mt: 3 }}>Select How to calculate properties.</Typography>
-					<ToggleButtonGroup
-						color="primary"
-						value={filters.groupCalculationFocus}
-						exclusive
-						onChange={handleChange('groupCalculationFocus')}
-						aria-label="Platform"
-					>
-						{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
-							<ToggleButton key={option} value={option} aria-label={option}>
-								{option}
-							</ToggleButton>
-						))}
-					</ToggleButtonGroup>
-				</Box>
+				{filters.groupBy !== 'collectionDate' && (
+					<Box>
+						<Typography sx={{ mt: 3 }}>Select How to calculate grouped numbers.</Typography>
+						<ToggleButtonGroup
+							color="primary"
+							value={filters.groupCalculationFocus}
+							exclusive
+							onChange={handleChange('groupCalculationFocus')}
+							aria-label="Platform"
+						>
+							{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
+								<ToggleButton key={option} value={option} aria-label={option}>
+									{option}
+								</ToggleButton>
+							))}
+						</ToggleButtonGroup>
+					</Box>
+				)}
 				<Box>
 					<Typography sx={{ mt: 3 }}>Select Filters to apply.</Typography>
 					{renderFilteringOptions()}
