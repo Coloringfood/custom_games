@@ -5,12 +5,41 @@ export const fetchCruiseData = async (filters) => {
 	if (filters && Object.keys(filters).length > 0) {
 		url.search = new URLSearchParams(filters).toString();
 	}
-	console.info('BBBB url: ', url, url.toString());
 	return fetch(url)
 		.then((res) => res.json())
 		.then((response) => {
-			console.info('BBBB response: ', response);
 			return response.data?.entries || response.data || [];
+		});
+};
+
+const convertAllDateProperties = (data) => {
+	return data.map((entry) => {
+		const newEntry = { ...entry };
+		newEntry.dateCollected = new Date(newEntry.dateCollected);
+		newEntry.startDate = new Date(newEntry.startDate);
+		newEntry.endDate = new Date(newEntry.endDate);
+		return newEntry;
+	});
+};
+
+export const fetchGraphData = async (filters) => {
+	const url = new URL(BASE_URL + '/graph');
+	if (filters && Object.keys(filters).length > 0) {
+		url.search = new URLSearchParams(filters).toString();
+	} else {
+		url.search = new URLSearchParams({ groupBy: 'cruise' }).toString();
+	}
+	return fetch(url)
+		.then((res) => res.json())
+		.then((response) => {
+			if (!response.data) {
+				return {};
+			}
+			return {
+				data: response.data?.entries || convertAllDateProperties(response.data) || [],
+				graphData: response.data?.graphData || {},
+				filterOptions: response.data?.filterOptions || {},
+			};
 		});
 };
 
@@ -167,6 +196,7 @@ export const groupData = (data) => {
 export default {
 	fetchCruiseData,
 	fetchTodaysBest,
+	fetchGraphData,
 	mapShipNames,
 	flatDataColumns,
 	initialState,

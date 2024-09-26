@@ -17,12 +17,7 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { DatePicker } from '@mui/x-date-pickers';
 import PropTypes from 'prop-types';
 import { style } from '#/components/styledComponents.jsx';
-import {
-	mapShipNames,
-	fetchCruiseData,
-	groupData,
-	SHIP_NAMES_MAPPING,
-} from '#/pages/Cruise/cruiseUtils.js';
+import { mapShipNames, fetchGraphData, SHIP_NAMES_MAPPING } from '#/pages/Cruise/cruiseUtils.js';
 
 const GROUP_BY_OPTIONS = [/*'days', 'events',*/ 'cruise'];
 const GROUP_OPTIONS_NAME_MAPPING = {
@@ -60,7 +55,7 @@ const FOCUS_OPTIONS_NAME_MAPPING = {
 
 const minDistance = 500;
 
-class CustomLineWrapper extends React.PureComponent {
+class CustomLineWrapper extends React.Component {
 	shouldComponentUpdate(nextProps) {
 		if (
 			!_.isEqual(this.props.xLabels, nextProps.xLabels) ||
@@ -108,14 +103,16 @@ const DynamicViewingGraph = () => {
 	const [loading, setLoading] = useState(false);
 	const [pulledCruises, setPulledCruises] = useState([]);
 	const [grouping, setGrouping] = useState('cruise');
-	const [focusOption, setFocusOption] = useState('cheapestPrice');
-	const [xAxisOption, setXAxisOption] = useState('collectionDate');
-	const [xAxisOptionVariation, setXAxisOptionVariation] = useState('lowest');
 	const [series, setSeries] = useState([]);
 	const [xLabels, setXLabels] = useState([]);
 	const [sliderValues, setSliderValues] = useState([5000, 50000]);
 	const [modalViewItem, setModalViewItem] = useState(null);
-	const [filters, setFilters] = useState({ flat: true });
+	const [filters, setFilters] = useState({
+		flat: true,
+		groupCalculationFocus: 'lowest',
+		xAxisOption: 'collectionDate',
+		focusOption: 'cheapestPrice',
+	});
 	const [cruiseNames, setCruiseNames] = useState([]);
 
 	const fetchData = async () => {
@@ -130,9 +127,18 @@ const DynamicViewingGraph = () => {
 				cleanedFilters[key] = cleanedFilters[key].join('|||');
 			}
 		});
-		const data = await fetchCruiseData(cleanedFilters);
-		const { cruises } = groupData(data);
-		setPulledCruises(cruises);
+		cleanedFilters.groupBy = grouping;
+		// console.log('BBBB cleanedFilters: ', cleanedFilters);
+		try {
+			const response = await fetchGraphData(cleanedFilters);
+			setPulledCruises(response.data);
+			setSeries(response.graphData?.series);
+			setXLabels(response.graphData?.xlabels);
+			setCruiseNames(response.filterOptions?.cruiseNames);
+			setSliderValues([response.graphData?.min - 1000, response.graphData?.max + 1000]);
+		} catch (error) {
+			console.error('Error getting entries:', error);
+		}
 		setLoading(false);
 	};
 
@@ -144,44 +150,12 @@ const DynamicViewingGraph = () => {
 		fetchData();
 	}, [filters]);
 
-	useEffect(() => {
-		const labels = [];
-		const series = [];
-		const newCruiseNames = new Set();
-
-		pulledCruises.forEach((cruise, index) => {
-			const currentSeries = {
-				data: [],
-				label: cruise.cruiseName,
-				id: index,
-				connectNulls: true,
-			};
-			newCruiseNames.add(cruise.name);
-			cruise.priceHistory.forEach((entry) => {
-				const dataPoint = parseInt(entry[focusOption]);
-				const label = entry.dateCollected;
-				const labelIndex = labels.findIndex((label) => label === entry.dateCollected);
-				if (labelIndex === -1) {
-					labels.push(label);
-					currentSeries.data.push(dataPoint);
-					return;
-				}
-				while (labelIndex > currentSeries.data.length) {
-					currentSeries.data.push(null);
-				}
-				currentSeries.data[labelIndex] = dataPoint;
-			});
-			series.push(currentSeries);
-		});
-
-		setSeries(series);
-		setXLabels(labels);
-		setCruiseNames([...newCruiseNames]);
-	}, [grouping, focusOption, pulledCruises]);
-
-	const handleChange = (setter) => (event, newFocusOption) => {
+	const handleChange = (property) => (event, newFocusOption) => {
 		if (newFocusOption) {
-			setter(newFocusOption);
+			setFilters({
+				...filters,
+				[property]: newFocusOption,
+			});
 		}
 	};
 
@@ -374,9 +348,9 @@ const DynamicViewingGraph = () => {
 						<Typography>Select which property to view in graph.</Typography>
 						<ToggleButtonGroup
 							color="primary"
-							value={focusOption}
+							value={filters.focusOption}
 							exclusive
-							onChange={handleChange(setFocusOption)}
+							onChange={handleChange('focusOption')}
 							aria-label="Platform"
 						>
 							{FOCUS_OPTIONS.map((option) => (
@@ -387,14 +361,14 @@ const DynamicViewingGraph = () => {
 						</ToggleButtonGroup>
 					</Box>
 				) : null}
-				{grouping && focusOption ? (
+				{grouping && filters.focusOption ? (
 					<Box>
 						<Typography>Select which X axis property to view in graph.</Typography>
 						<ToggleButtonGroup
 							color="primary"
-							value={xAxisOption}
+							value={filters.xAxisOption}
 							exclusive
-							onChange={handleChange(setXAxisOption)}
+							onChange={handleChange('xAxisOption')}
 							aria-label="Platform"
 						>
 							{X_AXIS_OPTIONS.map((option) => (
@@ -405,14 +379,14 @@ const DynamicViewingGraph = () => {
 						</ToggleButtonGroup>
 					</Box>
 				) : null}
-				{grouping && focusOption && xAxisOption ? (
+				{grouping && filters.focusOption && filters.xAxisOption ? (
 					<Box>
 						<Typography>Select How to calculate properties.</Typography>
 						<ToggleButtonGroup
 							color="primary"
-							value={xAxisOptionVariation}
+							value={filters.groupCalculationFocus}
 							exclusive
-							onChange={handleChange(setXAxisOptionVariation)}
+							onChange={handleChange('groupCalculationFocus')}
 							aria-label="Platform"
 						>
 							{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
