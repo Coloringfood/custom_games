@@ -19,23 +19,21 @@ import PropTypes from 'prop-types';
 import { style } from '#/components/styledComponents.jsx';
 import { mapShipNames, fetchGraphData, SHIP_NAMES_MAPPING } from '#/pages/Cruise/cruiseUtils.js';
 
-const GROUP_BY_OPTIONS = [/*'days', 'events',*/ 'cruise'];
+const GROUP_BY_OPTIONS = ['collectionDate', 'weekday', 'monthday', 'month'];
 const GROUP_OPTIONS_NAME_MAPPING = {
-	days: 'Days',
-	events: 'Time Pulled',
-	cruise: 'Cruise',
+	collectionDate: 'Price per Collection Date',
+	weekday: 'Price per Weekday Purchased on',
+	monthday: 'Price per Monthday Purchased on',
+	month: 'Price per Month Purchased on',
 };
-
-const X_AXIS_OPTIONS = ['collectionDate', 'weekday', 'monthday', 'month'];
 const X_AXIS_OPTIONS_VARIATIONS = ['lowest', 'average'];
 
-const FILTERING_OPTIONS = ['cruise', 'ship', 'startDate', 'endDate', 'collectionDate'];
+const FILTERING_OPTIONS = ['cruise', 'ship', 'startDate', 'endDate'];
 const FILTERING_OPTIONS_NAME_MAPPING = {
 	cruise: 'Cruise',
 	ship: 'Ship',
-	startDate: 'Start Date',
-	endDate: 'End Date',
-	collectionDate: 'Collection Date',
+	startDate: 'Earliest Cruise Start Date',
+	endDate: 'Latest Cruise End Date',
 };
 
 const FOCUS_OPTIONS = [
@@ -102,7 +100,6 @@ CustomLineWrapper.propTypes = {
 const DynamicViewingGraph = () => {
 	const [loading, setLoading] = useState(false);
 	const [pulledCruises, setPulledCruises] = useState([]);
-	const [grouping, setGrouping] = useState('cruise');
 	const [series, setSeries] = useState([]);
 	const [xLabels, setXLabels] = useState([]);
 	const [sliderValues, setSliderValues] = useState([5000, 50000]);
@@ -110,7 +107,7 @@ const DynamicViewingGraph = () => {
 	const [filters, setFilters] = useState({
 		flat: true,
 		groupCalculationFocus: 'lowest',
-		xAxisOption: 'collectionDate',
+		groupBy: 'collectionDate',
 		focusOption: 'cheapestPrice',
 	});
 	const [cruiseNames, setCruiseNames] = useState([]);
@@ -127,8 +124,6 @@ const DynamicViewingGraph = () => {
 				cleanedFilters[key] = cleanedFilters[key].join('|||');
 			}
 		});
-		cleanedFilters.groupBy = grouping;
-		// console.log('BBBB cleanedFilters: ', cleanedFilters);
 		try {
 			const response = await fetchGraphData(cleanedFilters);
 			setPulledCruises(response.data);
@@ -329,80 +324,58 @@ const DynamicViewingGraph = () => {
 				</Paper>
 			</Modal>
 			<Paper elevation={3} sx={{ p: 2 }}>
-				<Typography d="modal-modal-description" sx={{ mt: 2 }}>
-					Select how you want the data to be grouped.
-				</Typography>
-				{GROUP_BY_OPTIONS.map((option) => (
-					<Button
-						sx={{ m: 1 }}
-						variant={grouping === option ? 'contained' : 'outlined'}
-						key={option}
-						color="secondary"
-						onClick={() => setGrouping(option)}
+				<Box>
+					<Typography>Select which property to view in graph.</Typography>
+					<ToggleButtonGroup
+						color="primary"
+						value={filters.focusOption}
+						exclusive
+						onChange={handleChange('focusOption')}
+						aria-label="Platform"
 					>
-						{GROUP_OPTIONS_NAME_MAPPING[option]}
-					</Button>
-				))}
-				{grouping ? (
-					<Box>
-						<Typography>Select which property to view in graph.</Typography>
-						<ToggleButtonGroup
-							color="primary"
-							value={filters.focusOption}
-							exclusive
-							onChange={handleChange('focusOption')}
-							aria-label="Platform"
-						>
-							{FOCUS_OPTIONS.map((option) => (
-								<ToggleButton key={option} value={option} aria-label={option}>
-									{FOCUS_OPTIONS_NAME_MAPPING[option]}
-								</ToggleButton>
-							))}
-						</ToggleButtonGroup>
-					</Box>
-				) : null}
-				{grouping && filters.focusOption ? (
-					<Box>
-						<Typography>Select which X axis property to view in graph.</Typography>
-						<ToggleButtonGroup
-							color="primary"
-							value={filters.xAxisOption}
-							exclusive
-							onChange={handleChange('xAxisOption')}
-							aria-label="Platform"
-						>
-							{X_AXIS_OPTIONS.map((option) => (
-								<ToggleButton key={option} value={option} aria-label={option}>
-									{option}
-								</ToggleButton>
-							))}
-						</ToggleButtonGroup>
-					</Box>
-				) : null}
-				{grouping && filters.focusOption && filters.xAxisOption ? (
-					<Box>
-						<Typography>Select How to calculate properties.</Typography>
-						<ToggleButtonGroup
-							color="primary"
-							value={filters.groupCalculationFocus}
-							exclusive
-							onChange={handleChange('groupCalculationFocus')}
-							aria-label="Platform"
-						>
-							{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
-								<ToggleButton key={option} value={option} aria-label={option}>
-									{option}
-								</ToggleButton>
-							))}
-						</ToggleButtonGroup>
-					</Box>
-				) : null}
-				{grouping ? (
-					<Box>
-						<Typography>Select Filters to apply.</Typography>
-						{renderFilteringOptions()}
-					</Box>
-				) : null}
+						{FOCUS_OPTIONS.map((option) => (
+							<ToggleButton key={option} value={option} aria-label={option}>
+								{FOCUS_OPTIONS_NAME_MAPPING[option]}
+							</ToggleButton>
+						))}
+					</ToggleButtonGroup>
+				</Box>
+				<Box>
+					<Typography sx={{ mt: 3 }}>Select how you want the data to be grouped.</Typography>
+					<ToggleButtonGroup
+						color="primary"
+						value={filters.groupBy}
+						exclusive
+						onChange={handleChange('groupBy')}
+						aria-label="Platform"
+					>
+						{GROUP_BY_OPTIONS.map((option) => (
+							<ToggleButton key={option} value={option} aria-label={option}>
+								{GROUP_OPTIONS_NAME_MAPPING[option]}
+							</ToggleButton>
+						))}
+					</ToggleButtonGroup>
+				</Box>
+				<Box>
+					<Typography sx={{ mt: 3 }}>Select How to calculate properties.</Typography>
+					<ToggleButtonGroup
+						color="primary"
+						value={filters.groupCalculationFocus}
+						exclusive
+						onChange={handleChange('groupCalculationFocus')}
+						aria-label="Platform"
+					>
+						{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
+							<ToggleButton key={option} value={option} aria-label={option}>
+								{option}
+							</ToggleButton>
+						))}
+					</ToggleButtonGroup>
+				</Box>
+				<Box>
+					<Typography sx={{ mt: 3 }}>Select Filters to apply.</Typography>
+					{renderFilteringOptions()}
+				</Box>
 			</Paper>
 			<Divider />
 			<Paper variant="outlined" sx={{ p: 3 }}>
