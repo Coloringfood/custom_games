@@ -182,12 +182,19 @@ const DynamicViewingGraph = () => {
 	};
 
 	const handleMarkClick = (event, clickData) => {
-		const valueViewed = xLabels[clickData.dataIndex];
-		setModalViewItem(
-			pulledCruises[clickData.seriesId].priceHistory.find(
-				(entry) => entry?.dateCollected === valueViewed,
-			),
-		);
+		switch (filters.groupBy) {
+			case 'collectionDate':
+				(() => {
+					const label = xLabels[clickData.dataIndex];
+					const labelDate = new Date(label).toISOString();
+					const actualCruise = pulledCruises.find((a) => a.id === clickData.seriesId);
+					const viewedDate = actualCruise.priceHistory.find(
+						(entry) => entry.dateCollected === labelDate,
+					);
+					setModalViewItem(viewedDate);
+				})();
+				break;
+		}
 	};
 
 	const renderFilterOptionOptions = (option) => {

@@ -1,5 +1,5 @@
-const BASE_URL = 'http://api.timaeustech.com/cruise';
-// const BASE_URL = 'http://localhost:3000/cruise';
+// const BASE_URL = 'http://api.timaeustech.com/cruise';
+const BASE_URL = 'http://localhost:3000/cruise';
 export const fetchCruiseData = async (filters) => {
 	const url = new URL(BASE_URL);
 	if (filters && Object.keys(filters).length > 0) {
@@ -10,16 +10,6 @@ export const fetchCruiseData = async (filters) => {
 		.then((response) => {
 			return response.data?.entries || response.data || [];
 		});
-};
-
-const convertAllDateProperties = (data) => {
-	return data.map((entry) => {
-		const newEntry = { ...entry };
-		newEntry.dateCollected = new Date(newEntry.dateCollected);
-		newEntry.startDate = new Date(newEntry.startDate);
-		newEntry.endDate = new Date(newEntry.endDate);
-		return newEntry;
-	});
 };
 
 export const fetchGraphData = async (filters) => {
@@ -36,7 +26,7 @@ export const fetchGraphData = async (filters) => {
 				return {};
 			}
 			return {
-				data: response.data?.entries || convertAllDateProperties(response.data) || [],
+				data: response.data?.entries || [],
 				graphData: response.data?.graphData || {},
 				filterOptions: response.data?.filterOptions || {},
 			};
@@ -54,6 +44,7 @@ export const SHIP_NAMES_MAPPING = {
 	ShipLogo_DisneyFantasy: 'Disney Fantasy',
 	ShipLogo_DisneyMagic: 'Disney Magic',
 	'Treasure-Logo-Blue-Horizontal': 'Disney Treasure',
+	ShipLogo_DisneyWonder: 'Disney Wonder',
 };
 export const mapShipNames = (shipName) => SHIP_NAMES_MAPPING[shipName] || shipName;
 
