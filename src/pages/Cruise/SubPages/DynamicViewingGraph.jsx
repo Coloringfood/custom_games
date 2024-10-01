@@ -12,7 +12,12 @@ import {
 	Slider,
 	Modal,
 	TextField,
+	Accordion,
+	AccordionSummary,
+	AccordionDetails,
 } from '@mui/material';
+
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { DatePicker } from '@mui/x-date-pickers';
 import PropTypes from 'prop-types';
@@ -28,12 +33,13 @@ const GROUP_OPTIONS_NAME_MAPPING = {
 };
 const X_AXIS_OPTIONS_VARIATIONS = ['lowest', 'average'];
 
-const FILTERING_OPTIONS = ['cruise', 'ship', 'startDate', 'endDate'];
+const FILTERING_OPTIONS = ['cruise', 'ship', 'startDate', 'endDate', 'destinations'];
 const FILTERING_OPTIONS_NAME_MAPPING = {
 	cruise: 'Cruise',
 	ship: 'Ship',
 	startDate: 'Earliest Cruise Start Date',
 	endDate: 'Latest Cruise End Date',
+	destinations: 'Destinations',
 };
 
 const FOCUS_OPTIONS = [
@@ -112,6 +118,7 @@ const DynamicViewingGraph = () => {
 	const [modalViewItem, setModalViewItem] = useState(null);
 	const [filters, setFilters] = useState(DEFAULT_FILTERS);
 	const [cruiseNames, setCruiseNames] = useState([]);
+	const [destinations, setDestinations] = useState([]);
 
 	const fetchData = async (override) => {
 		if (loading && !override) return;
@@ -132,6 +139,7 @@ const DynamicViewingGraph = () => {
 			setXLabels(response.graphData?.xlabels);
 			setCruiseNames(response.filterOptions?.cruiseNames);
 			setSliderValues([response.graphData?.min - 1000, response.graphData?.max + 1000]);
+			setDestinations(response.filterOptions?.destinations);
 		} catch (error) {
 			console.error('Error getting entries:', error);
 		}
@@ -143,7 +151,16 @@ const DynamicViewingGraph = () => {
 		// load previous filters from local storage if there
 		const storedFilters = localStorage.getItem('cruiseFilters');
 		if (storedFilters) {
-			setFilters(JSON.parse(storedFilters));
+			const newFilters = JSON.parse(storedFilters);
+			if (newFilters.startDate) {
+				// newFilters.startDate = new Date(newFilters.startDate);
+				delete newFilters.startDate;
+			}
+			if (newFilters.endDate) {
+				// newFilters.endDate = new Date(newFilters.endDate);
+				delete newFilters.endDate;
+			}
+			setFilters(newFilters);
 		}
 	}, []);
 
@@ -266,6 +283,29 @@ const DynamicViewingGraph = () => {
 						/>
 					</Paper>
 				);
+			case 'destinations':
+				return (
+					<Paper key={`${option}_options`} sx={{ p: 1, m: 2 }} elevation={3}>
+						{destinations.map((destination) => (
+							<Button
+								key={destination}
+								sx={{ m: 0.5 }}
+								variant={filters.destinations?.includes(destination) ? 'contained' : 'outlined'}
+								color="secondary"
+								onClick={() => {
+									setFilters({
+										...filters,
+										destinations: filters.destinations?.includes(destination)
+											? filters.destinations.filter((item) => item !== destination)
+											: [...(filters.destinations || []), destination],
+									});
+								}}
+							>
+								{destination}
+							</Button>
+						))}
+					</Paper>
+				);
 		}
 	};
 
@@ -332,79 +372,88 @@ const DynamicViewingGraph = () => {
 							<li>Concierge: {modalViewItem?.conciergePrice || 'unavailable'}</li>
 						</ul>
 						<Typography variant="h7" component="h5">
-							<b> Collected on:</b> {modalViewItem?.dateCollected}
+							<b> Collected on:</b> {new Date(modalViewItem?.dateCollected).toLocaleDateString()}
 						</Typography>
 					</Typography>
 				</Paper>
 			</Modal>
-			<Paper elevation={3} sx={{ p: 2 }}>
-				<Box>
-					<Typography>Select which price option to view in graph.</Typography>
-					<ToggleButtonGroup
-						color="primary"
-						value={filters.focusOption}
-						exclusive
-						onChange={handleChange('focusOption')}
-						aria-label="Platform"
-					>
-						{FOCUS_OPTIONS.map((option) => (
-							<ToggleButton key={option} value={option} aria-label={option}>
-								{FOCUS_OPTIONS_NAME_MAPPING[option]}
-							</ToggleButton>
-						))}
-					</ToggleButtonGroup>
-				</Box>
-				<Box>
-					<Typography sx={{ mt: 3 }}>Select how you want the data to be grouped.</Typography>
-					<ToggleButtonGroup
-						color="primary"
-						value={filters.groupBy}
-						exclusive
-						onChange={handleChange('groupBy')}
-						aria-label="Platform"
-					>
-						{GROUP_BY_OPTIONS.map((option) => (
-							<ToggleButton key={option} value={option} aria-label={option}>
-								{GROUP_OPTIONS_NAME_MAPPING[option]}
-							</ToggleButton>
-						))}
-					</ToggleButtonGroup>
-				</Box>
-				{filters.groupBy !== 'collectionDate' && (
+			<Accordion>
+				<AccordionSummary
+					expandIcon={<ExpandMoreIcon />}
+					aria-controls="panel1-content"
+					id="panel1-header"
+				>
+					Filters
+				</AccordionSummary>
+				<AccordionDetails>
 					<Box>
-						<Typography sx={{ mt: 3 }}>Select How to calculate grouped numbers.</Typography>
+						<Typography>Select which price option to view in graph.</Typography>
 						<ToggleButtonGroup
 							color="primary"
-							value={filters.groupCalculationFocus}
+							value={filters.focusOption}
 							exclusive
-							onChange={handleChange('groupCalculationFocus')}
+							onChange={handleChange('focusOption')}
 							aria-label="Platform"
 						>
-							{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
+							{FOCUS_OPTIONS.map((option) => (
 								<ToggleButton key={option} value={option} aria-label={option}>
-									{option}
+									{FOCUS_OPTIONS_NAME_MAPPING[option]}
 								</ToggleButton>
 							))}
 						</ToggleButtonGroup>
 					</Box>
-				)}
-				<Box>
-					<Typography sx={{ mt: 3 }}>Select Filters to apply.</Typography>
-					{renderFilteringOptions()}
-				</Box>
-				<Box>
-					<Button
-						sx={{ mt: 3 }}
-						variant="contained"
-						color="primary"
-						onClick={() => {
-							setFilters(DEFAULT_FILTERS);
-						}}
-					>
-						Reset Filters
-					</Button>
-				</Box>
-			</Paper>
+					<Box>
+						<Typography sx={{ mt: 3 }}>Select how you want the data to be grouped.</Typography>
+						<ToggleButtonGroup
+							color="primary"
+							value={filters.groupBy}
+							exclusive
+							onChange={handleChange('groupBy')}
+							aria-label="Platform"
+						>
+							{GROUP_BY_OPTIONS.map((option) => (
+								<ToggleButton key={option} value={option} aria-label={option}>
+									{GROUP_OPTIONS_NAME_MAPPING[option]}
+								</ToggleButton>
+							))}
+						</ToggleButtonGroup>
+					</Box>
+					{filters.groupBy !== 'collectionDate' && (
+						<Box>
+							<Typography sx={{ mt: 3 }}>Select How to calculate grouped numbers.</Typography>
+							<ToggleButtonGroup
+								color="primary"
+								value={filters.groupCalculationFocus}
+								exclusive
+								onChange={handleChange('groupCalculationFocus')}
+								aria-label="Platform"
+							>
+								{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
+									<ToggleButton key={option} value={option} aria-label={option}>
+										{option}
+									</ToggleButton>
+								))}
+							</ToggleButtonGroup>
+						</Box>
+					)}
+					<Box>
+						<Typography sx={{ mt: 3 }}>Select Filters to apply.</Typography>
+						{renderFilteringOptions()}
+					</Box>
+					<Box>
+						<Button
+							sx={{ mt: 3 }}
+							variant="contained"
+							color="primary"
+							onClick={() => {
+								setFilters(DEFAULT_FILTERS);
+							}}
+						>
+							Reset Filters
+						</Button>
+					</Box>
+				</AccordionDetails>
+			</Accordion>
 			<Divider />
 			<Paper variant="outlined" sx={{ p: 3 }}>
 				<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
