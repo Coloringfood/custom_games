@@ -51,6 +51,13 @@ const FOCUS_OPTIONS_NAME_MAPPING = {
 	conciergePrice: 'Concierge Room Price',
 };
 
+const DEFAULT_FILTERS = {
+	flat: true,
+	groupCalculationFocus: 'lowest',
+	groupBy: 'collectionDate',
+	focusOption: 'cheapestPrice',
+};
+
 const minDistance = 500;
 
 class CustomLineWrapper extends React.Component {
@@ -97,22 +104,17 @@ CustomLineWrapper.propTypes = {
 };
 
 const DynamicViewingGraph = () => {
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(true);
 	const [pulledCruises, setPulledCruises] = useState([]);
 	const [series, setSeries] = useState([]);
 	const [xLabels, setXLabels] = useState([]);
 	const [sliderValues, setSliderValues] = useState([5000, 50000]);
 	const [modalViewItem, setModalViewItem] = useState(null);
-	const [filters, setFilters] = useState({
-		flat: true,
-		groupCalculationFocus: 'lowest',
-		groupBy: 'collectionDate',
-		focusOption: 'cheapestPrice',
-	});
+	const [filters, setFilters] = useState(DEFAULT_FILTERS);
 	const [cruiseNames, setCruiseNames] = useState([]);
 
-	const fetchData = async () => {
-		if (loading) return;
+	const fetchData = async (override) => {
+		if (loading && !override) return;
 		setLoading(true);
 		let cleanedFilters = _.cloneDeep(filters);
 		Object.keys(cleanedFilters).forEach((key) => {
@@ -137,10 +139,16 @@ const DynamicViewingGraph = () => {
 	};
 
 	useEffect(() => {
-		fetchData();
+		fetchData(true);
+		// load previous filters from local storage if there
+		const storedFilters = localStorage.getItem('cruiseFilters');
+		if (storedFilters) {
+			setFilters(JSON.parse(storedFilters));
+		}
 	}, []);
 
 	useEffect(() => {
+		if (!loading) localStorage.setItem('cruiseFilters', JSON.stringify(filters));
 		fetchData();
 	}, [filters]);
 
@@ -383,6 +391,18 @@ const DynamicViewingGraph = () => {
 				<Box>
 					<Typography sx={{ mt: 3 }}>Select Filters to apply.</Typography>
 					{renderFilteringOptions()}
+				</Box>
+				<Box>
+					<Button
+						sx={{ mt: 3 }}
+						variant="contained"
+						color="primary"
+						onClick={() => {
+							setFilters(DEFAULT_FILTERS);
+						}}
+					>
+						Reset Filters
+					</Button>
 				</Box>
 			</Paper>
 			<Divider />

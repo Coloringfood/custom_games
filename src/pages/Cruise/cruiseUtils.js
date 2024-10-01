@@ -1,5 +1,5 @@
-// const BASE_URL = 'http://api.timaeustech.com/cruise';
-const BASE_URL = 'http://localhost:3000/cruise';
+const BASE_URL = 'http://api.timaeustech.com/cruise';
+// const BASE_URL = 'http://localhost:3000/cruise';
 export const fetchCruiseData = async (filters) => {
 	const url = new URL(BASE_URL);
 	if (filters && Object.keys(filters).length > 0) {
