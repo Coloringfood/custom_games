@@ -134,8 +134,12 @@ const DynamicViewingGraph = () => {
 			}
 		});
 		try {
-			console.log('BBBB cleanedFilters: ', cleanedFilters);
 			const response = await fetchGraphData(cleanedFilters);
+			// If response is empty object, bail
+			if (Object.keys(response).length === 0) {
+				setLoading(false);
+				return;
+			}
 			setPulledCruises(response.data);
 			setSeries(response.graphData?.series);
 			setXLabels(response.graphData?.xlabels);
