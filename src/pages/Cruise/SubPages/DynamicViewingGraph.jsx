@@ -133,6 +133,7 @@ const DynamicViewingGraph = () => {
 			}
 		});
 		try {
+			console.log('BBBB cleanedFilters: ', cleanedFilters);
 			const response = await fetchGraphData(cleanedFilters);
 			setPulledCruises(response.data);
 			setSeries(response.graphData?.series);
@@ -147,7 +148,6 @@ const DynamicViewingGraph = () => {
 	};
 
 	useEffect(() => {
-		fetchData(true);
 		// load previous filters from local storage if there
 		const storedFilters = localStorage.getItem('cruiseFilters');
 		if (storedFilters) {
@@ -160,7 +160,10 @@ const DynamicViewingGraph = () => {
 				// newFilters.endDate = new Date(newFilters.endDate);
 				delete newFilters.endDate;
 			}
+			setLoading(false);
 			setFilters(newFilters);
+		} else {
+			fetchData(true);
 		}
 	}, []);
 
@@ -211,7 +214,7 @@ const DynamicViewingGraph = () => {
 			case 'collectionDate':
 				(() => {
 					const label = xLabels[clickData.dataIndex];
-					const labelDate = new Date(label).toISOString();
+					const labelDate = new Date(label).toLocaleString();
 					const actualCruise = pulledCruises.find((a) => a.id === clickData.seriesId);
 					const viewedDate = actualCruise.priceHistory.find(
 						(entry) => entry.dateCollected === labelDate,
@@ -358,7 +361,7 @@ const DynamicViewingGraph = () => {
 						<b> Name:</b> {mapShipNames(modalViewItem?.shipName)}
 					</Typography>
 					<Typography variant="h6" component="h4">
-						<b>Departure:</b> {modalViewItem?.startDate}
+						<b>Departure:</b> {new Date(modalViewItem?.startDate).toLocaleString()}
 					</Typography>
 					<Typography variant="h6" component="h4">
 						<b>Destinations:</b> {modalViewItem?.destinations}
@@ -371,9 +374,9 @@ const DynamicViewingGraph = () => {
 							<li>Verandah: {modalViewItem?.verandahPrice || 'unavailable'}</li>
 							<li>Concierge: {modalViewItem?.conciergePrice || 'unavailable'}</li>
 						</ul>
-						<Typography variant="h7" component="h5">
-							<b> Collected on:</b> {new Date(modalViewItem?.dateCollected).toLocaleDateString()}
-						</Typography>
+					</Typography>
+					<Typography variant="h7" component="h5">
+						<b> Collected on:</b> {new Date(modalViewItem?.dateCollected).toLocaleString()}
 					</Typography>
 				</Paper>
 			</Modal>
