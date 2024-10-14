@@ -24,9 +24,10 @@ import PropTypes from 'prop-types';
 import { style } from '#/components/styledComponents.jsx';
 import { mapShipNames, fetchGraphData, SHIP_NAMES_MAPPING } from '#/pages/Cruise/cruiseUtils.js';
 
-const GROUP_BY_OPTIONS = ['collectionDate', 'weekday', 'monthday', 'month'];
+const GROUP_BY_OPTIONS = ['collectionDate', 'collectionDay', 'weekday', 'monthday', 'month'];
 const GROUP_OPTIONS_NAME_MAPPING = {
-	collectionDate: 'Price per Collection Date',
+	collectionDate: 'Price per Collection Event',
+	collectionDay: 'Price per Day Collected On',
 	weekday: 'Price per Weekday Purchased on',
 	monthday: 'Price per Day of month Purchased on',
 	month: 'Price per Month Purchased during',
@@ -214,10 +215,9 @@ const DynamicViewingGraph = () => {
 			case 'collectionDate':
 				(() => {
 					const label = xLabels[clickData.dataIndex];
-					const labelDate = new Date(label).toLocaleString();
 					const actualCruise = pulledCruises.find((a) => a.id === clickData.seriesId);
 					const viewedDate = actualCruise.priceHistory.find(
-						(entry) => entry.dateCollected === labelDate,
+						(entry) => entry.dateCollected === label,
 					);
 					setModalViewItem(viewedDate);
 				})();
