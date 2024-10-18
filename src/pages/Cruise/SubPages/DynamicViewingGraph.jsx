@@ -24,10 +24,18 @@ import PropTypes from 'prop-types';
 import { style } from '#/components/styledComponents.jsx';
 import { mapShipNames, fetchGraphData, SHIP_NAMES_MAPPING } from '#/pages/Cruise/cruiseUtils.js';
 
-const GROUP_BY_OPTIONS = ['collectionDate', 'collectionDay', 'weekday', 'monthday', 'month'];
+const GROUP_BY_OPTIONS = [
+	'collectionDate',
+	'collectionDay',
+	'weekday',
+	'monthday',
+	'month',
+	'daysBeforeSailing',
+];
 const GROUP_OPTIONS_NAME_MAPPING = {
 	collectionDate: 'Price per Collection Event',
 	collectionDay: 'Price per Day Collected On',
+	daysBeforeSailing: 'Price based on Days Before Sailing',
 	weekday: 'Price per Weekday Purchased on',
 	monthday: 'Price per Day of month Purchased on',
 	month: 'Price per Month Purchased during',
