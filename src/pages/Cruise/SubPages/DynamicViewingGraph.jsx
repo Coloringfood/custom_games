@@ -24,6 +24,7 @@ import { DatePicker } from '@mui/x-date-pickers';
 import PropTypes from 'prop-types';
 import { style } from '#/components/styledComponents.jsx';
 import { mapShipNames, fetchGraphData, SHIP_NAMES_MAPPING } from '#/pages/Cruise/cruiseUtils.js';
+import { fetchFilterData } from '../cruiseUtils.js';
 
 const FILTERING_OPTIONS_NAME_MAPPING = {
 	cruise: 'Cruise',
@@ -53,6 +54,7 @@ class CustomLineWrapper extends React.Component {
 		}
 		return false;
 	}
+
 	render() {
 		return (
 			<Stack direction="row" spacing={2}>
@@ -84,6 +86,9 @@ CustomLineWrapper.propTypes = {
 	sliderValues: PropTypes.array.isRequired,
 	series: PropTypes.array.isRequired,
 };
+
+// todo: when clicking on a line in the graph, allow to focus, or hide line
+// Also add a button to show all lines again
 
 const DynamicViewingGraph = () => {
 	const [loading, setLoading] = useState(true);
@@ -124,11 +129,9 @@ const DynamicViewingGraph = () => {
 		try {
 			if (!availableFilters.groupings.xAxis) {
 				// fetch filters from API
-				fetch('http://localhost:3000/cruise/filters')
-					.then((res) => res.json())
-					.then((response) => {
-						setAvailableFilters(response.data);
-					});
+				fetchFilterData().then((response) => {
+					setAvailableFilters(response);
+				});
 			}
 			const response = await fetchGraphData(cleanedFilters);
 			// If response is empty object, bail
@@ -152,7 +155,7 @@ const DynamicViewingGraph = () => {
 		const storedFilters = localStorage.getItem('cruiseFilters');
 		if (storedFilters) {
 			const newFilters = JSON.parse(storedFilters);
-			if (newFilters.version !== 0) {
+			if (newFilters.version !== 1) {
 				fetchData(true);
 				return;
 			}

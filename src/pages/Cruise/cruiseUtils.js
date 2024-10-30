@@ -12,6 +12,15 @@ export const fetchCruiseData = async (filters) => {
 		});
 };
 
+export const fetchFilterData = async () => {
+	const url = new URL(BASE_URL + '/filters');
+	return fetch(url)
+		.then((res) => res.json())
+		.then((response) => {
+			return response.data || {};
+		});
+};
+
 export const fetchGraphData = async (filters) => {
 	const url = new URL(BASE_URL + '/graph');
 	if (filters && Object.keys(filters).length > 0) {
