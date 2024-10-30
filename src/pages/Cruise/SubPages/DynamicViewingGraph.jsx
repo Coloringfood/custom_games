@@ -16,6 +16,7 @@ import {
 	AccordionSummary,
 	AccordionDetails,
 } from '@mui/material';
+import './styles.css';
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { LineChart } from '@mui/x-charts/LineChart';
@@ -24,25 +25,6 @@ import PropTypes from 'prop-types';
 import { style } from '#/components/styledComponents.jsx';
 import { mapShipNames, fetchGraphData, SHIP_NAMES_MAPPING } from '#/pages/Cruise/cruiseUtils.js';
 
-const GROUP_BY_OPTIONS = [
-	'collectionDate',
-	'collectionDay',
-	'weekday',
-	'monthday',
-	'month',
-	'daysBeforeSailing',
-];
-const GROUP_OPTIONS_NAME_MAPPING = {
-	collectionDate: 'Price per Collection Event',
-	collectionDay: 'Price per Day Collected On',
-	daysBeforeSailing: 'Price based on Days Before Sailing',
-	weekday: 'Price per Weekday Purchased on',
-	monthday: 'Price per Day of month Purchased on',
-	month: 'Price per Month Purchased during',
-};
-const X_AXIS_OPTIONS_VARIATIONS = ['lowest', 'average'];
-
-const FILTERING_OPTIONS = ['cruise', 'ship', 'startDate', 'endDate', 'destinations'];
 const FILTERING_OPTIONS_NAME_MAPPING = {
 	cruise: 'Cruise',
 	ship: 'Ship',
@@ -51,25 +33,10 @@ const FILTERING_OPTIONS_NAME_MAPPING = {
 	destinations: 'Destinations',
 };
 
-const FOCUS_OPTIONS = [
-	'cheapestPrice',
-	'interiorPrice',
-	'oceanViewPrice',
-	'verandahPrice',
-	'conciergePrice',
-];
-const FOCUS_OPTIONS_NAME_MAPPING = {
-	cheapestPrice: 'Cheapest Room Price',
-	interiorPrice: 'Interior Room  Price',
-	oceanViewPrice: 'Ocean View Room Price',
-	verandahPrice: 'Verandah Room Price',
-	conciergePrice: 'Concierge Room Price',
-};
-
 const DEFAULT_FILTERS = {
-	flat: true,
 	groupCalculationFocus: 'lowest',
-	groupBy: 'collectionDate',
+	groupBy: 'weekday',
+	ships: ['ShipLogo_DisneyMagic'],
 	focusOption: 'cheapestPrice',
 };
 
@@ -125,14 +92,26 @@ const DynamicViewingGraph = () => {
 	const [xLabels, setXLabels] = useState([]);
 	const [sliderValues, setSliderValues] = useState([5000, 50000]);
 	const [modalViewItem, setModalViewItem] = useState(null);
+	const [availableFilters, setAvailableFilters] = useState({
+		version: 1,
+		filters: {
+			startDate: null,
+			endDate: null,
+		},
+		nameMappings: {
+			startDate: 'Start Date',
+			endDate: 'End Date',
+		},
+		groupings: {},
+	});
 	const [filters, setFilters] = useState(DEFAULT_FILTERS);
-	const [cruiseNames, setCruiseNames] = useState([]);
-	const [destinations, setDestinations] = useState([]);
+	const [visibleFilters, setVisibleFilters] = useState({});
 
 	const fetchData = async (override) => {
 		if (loading && !override) return;
 		setLoading(true);
 		let cleanedFilters = _.cloneDeep(filters);
+		console.log('BBBB cleanedFilters BEFORE: ', cleanedFilters);
 		Object.keys(cleanedFilters).forEach((key) => {
 			if (cleanedFilters[key]?.length === 0 || !cleanedFilters[key]) {
 				delete cleanedFilters[key];
@@ -141,7 +120,16 @@ const DynamicViewingGraph = () => {
 				cleanedFilters[key] = cleanedFilters[key].join('|||');
 			}
 		});
+		console.log('BBBB cleanedFilters AFTER: ', cleanedFilters);
 		try {
+			if (!availableFilters.groupings.xAxis) {
+				// fetch filters from API
+				fetch('http://localhost:3000/cruise/filters')
+					.then((res) => res.json())
+					.then((response) => {
+						setAvailableFilters(response.data);
+					});
+			}
 			const response = await fetchGraphData(cleanedFilters);
 			// If response is empty object, bail
 			if (Object.keys(response).length === 0) {
@@ -151,9 +139,8 @@ const DynamicViewingGraph = () => {
 			setPulledCruises(response.data);
 			setSeries(response.graphData?.series);
 			setXLabels(response.graphData?.xlabels);
-			setCruiseNames(response.filterOptions?.cruiseNames);
+			setVisibleFilters(response.filterOptions);
 			setSliderValues([response.graphData?.min - 1000, response.graphData?.max + 1000]);
-			setDestinations(response.filterOptions?.destinations);
 		} catch (error) {
 			console.error('Error getting entries:', error);
 		}
@@ -165,14 +152,12 @@ const DynamicViewingGraph = () => {
 		const storedFilters = localStorage.getItem('cruiseFilters');
 		if (storedFilters) {
 			const newFilters = JSON.parse(storedFilters);
-			if (newFilters.startDate) {
-				// newFilters.startDate = new Date(newFilters.startDate);
-				delete newFilters.startDate;
+			if (newFilters.version !== 0) {
+				fetchData(true);
+				return;
 			}
-			if (newFilters.endDate) {
-				// newFilters.endDate = new Date(newFilters.endDate);
-				delete newFilters.endDate;
-			}
+			delete newFilters.startDate;
+			delete newFilters.endDate;
 			setLoading(false);
 			setFilters(newFilters);
 		} else {
@@ -185,15 +170,7 @@ const DynamicViewingGraph = () => {
 		fetchData();
 	}, [filters]);
 
-	const handleChange = (property) => (event, newFocusOption) => {
-		if (newFocusOption) {
-			setFilters({
-				...filters,
-				[property]: newFocusOption,
-			});
-		}
-	};
-
+	//region Graph Slider section
 	const handleSliderChange = (event, newValue, activeThumb) => {
 		if (!Array.isArray(newValue)) {
 			return;
@@ -237,124 +214,127 @@ const DynamicViewingGraph = () => {
 		}
 	};
 
-	const renderFilterOptionOptions = (option) => {
-		switch (option) {
-			case 'cruise':
-				return (
-					<Paper key={`${option}_options`} sx={{ p: 1, m: 2 }} elevation={3}>
-						{cruiseNames.map((cruise) => (
-							<Button
-								key={cruise}
-								sx={{ m: 0.5 }}
-								variant={filters.cruise?.includes(cruise) ? 'contained' : 'outlined'}
-								color="secondary"
-								onClick={() => {
-									setFilters({
-										...filters,
-										cruise: filters.cruise?.includes(cruise)
-											? filters.cruise.filter((item) => item !== cruise)
-											: [...(filters.cruise || []), cruise],
-									});
-								}}
-							>
-								{cruise}
-							</Button>
-						))}
-					</Paper>
-				);
-			case 'ship':
-				return (
-					<Paper key={`${option}_options`} sx={{ p: 1, m: 2 }} elevation={3}>
-						{Object.keys(SHIP_NAMES_MAPPING).map((ship) => (
-							<Button
-								key={ship}
-								sx={{ m: 0.5 }}
-								variant={filters.ship?.includes(ship) ? 'contained' : 'outlined'}
-								color="secondary"
-								onClick={() => {
-									setFilters({
-										...filters,
-										ship: filters.ship?.includes(ship)
-											? filters.ship.filter((item) => item !== ship)
-											: [...(filters.ship || []), ship],
-									});
-								}}
-							>
-								{SHIP_NAMES_MAPPING[ship]}
-							</Button>
-						))}
-					</Paper>
-				);
-			case 'startDate':
-			case 'endDate':
-			case 'collectionDate':
-				return (
-					<Paper key={`${option}_options`} sx={{ p: 1, m: 2 }} elevation={3}>
-						<DatePicker
-							color="secondary"
-							label={FILTERING_OPTIONS_NAME_MAPPING[option]}
-							value={Array.isArray(filters[option]) ? null : filters[option]}
-							onChange={(date) => setFilters({ ...filters, [option]: date })}
-						/>
-					</Paper>
-				);
-			case 'destinations':
-				return (
-					<Paper key={`${option}_options`} sx={{ p: 1, m: 2 }} elevation={3}>
-						{destinations.map((destination) => (
-							<Button
-								key={destination}
-								sx={{ m: 0.5 }}
-								variant={filters.destinations?.includes(destination) ? 'contained' : 'outlined'}
-								color="secondary"
-								onClick={() => {
-									setFilters({
-										...filters,
-										destinations: filters.destinations?.includes(destination)
-											? filters.destinations.filter((item) => item !== destination)
-											: [...(filters.destinations || []), destination],
-									});
-								}}
-							>
-								{destination}
-							</Button>
-						))}
-					</Paper>
-				);
-		}
+	//endregion
+
+	const handleBoolToggleChange = (property) => () => {
+		setFilters({
+			...filters,
+			[property]: filters[property] && filters[property].includes('true') ? [] : ['true'],
+		});
 	};
 
-	const renderFilteringOptions = () => {
-		const buildButton = (option) => (
+	const handleArrayChange = (property, unique) => (event) => {
+		const newFocusOption = event.target.value;
+		if (unique) {
+			setFilters({
+				...filters,
+				[property]: [newFocusOption],
+			});
+			return;
+		}
+		const newFilters = { ...filters };
+		if (!newFilters[property]) {
+			newFilters[property] = [newFocusOption];
+		} else if (newFilters[property]?.includes(newFocusOption)) {
+			newFilters[property] = newFilters[property].filter((a) => a !== newFocusOption);
+		} else {
+			newFilters[property] = [...newFilters[property], newFocusOption];
+		}
+		setFilters(newFilters);
+	};
+
+	const renderFilteringOptionGroup = ({
+		options = [],
+		selected = [],
+		available,
+		property,
+		onClick,
+	}) => {
+		const Title = (
+			<Typography sx={{ mt: 3 }}>{availableFilters.nameMappings[property] || property}.</Typography>
+		);
+		const paperProperties = {
+			key: `${property}_options`,
+			sx: { p: 1, m: 2 },
+			elevation: 3,
+		};
+		const ClearButton = (
 			<Button
-				key={option}
-				sx={{ m: 1 }}
-				variant={filters[option] ? 'contained' : 'outlined'}
-				color="primary"
-				onClick={() => {
-					setFilters({ ...filters, [option]: filters[option] ? undefined : [] });
-				}}
+				key={`${property}_clear`}
+				sx={{ m: 0.5 }}
+				variant={selected.length ? 'contained' : 'outlined'}
+				color="secondary"
+				onClick={() => setFilters({ ...filters, [property]: [] })}
 			>
-				{FILTERING_OPTIONS_NAME_MAPPING[option]}
+				Clear
 			</Button>
 		);
-		let options = [];
-		// First render any options that are selected, but sorted according to the array
-		Object.keys(filters)
-			.sort((a, b) => FILTERING_OPTIONS.indexOf(a) - FILTERING_OPTIONS.indexOf(b))
-			.forEach((key) => {
-				if (filters[key] && FILTERING_OPTIONS.includes(key)) {
-					options.push(buildButton(key));
-					options.push(renderFilterOptionOptions(key));
-				}
-			});
-		// Then render the rest
-		FILTERING_OPTIONS.forEach((option) => {
-			if (!filters[option]) {
-				options.push(buildButton(option));
-			}
-		});
-		return options;
+		if (typeof options === 'boolean') {
+			return (
+				<Paper {...paperProperties}>
+					{Title}
+					<ToggleButtonGroup
+						value={selected.length ? selected : ['false']}
+						onChange={handleBoolToggleChange(property)}
+						aria-label={property}
+						color="secondary"
+					>
+						<ToggleButton value={'false'}>Disabled</ToggleButton>
+						<ToggleButton value={'true'}>Enabled</ToggleButton>
+					</ToggleButtonGroup>
+				</Paper>
+			);
+		}
+		if (!Array.isArray(options) && typeof options !== 'object') {
+			return;
+		}
+		if (!Array.isArray(selected)) {
+			selected = [selected];
+		}
+
+		if (property.includes('Date')) {
+			return (
+				<Paper {...paperProperties}>
+					{Title}
+					<DatePicker
+						color="secondary"
+						label={FILTERING_OPTIONS_NAME_MAPPING[property]}
+						value={selected[0]}
+						onChange={(date) => setFilters({ ...filters, [property]: [date] })}
+					/>
+					<Divider />
+					{ClearButton}
+				</Paper>
+			);
+		} else if (!options || options?.length === 0) {
+			return `Empty property ${property}`;
+		}
+		let mapping = {};
+		if (!Array.isArray(options) && typeof options === 'object') {
+			mapping = options;
+			options = Object.keys(options);
+		}
+
+		return (
+			<Paper {...paperProperties}>
+				{Title}
+				{options.map((option) => (
+					<Button
+						key={`${property}_${option}`}
+						sx={{ m: 0.5 }}
+						variant={selected.includes(option) ? 'contained' : 'outlined'}
+						color="secondary"
+						className={Array.isArray(available) && !available.includes(option) ? 'ghosted' : ''}
+						onClick={onClick}
+						value={option}
+					>
+						{mapping[option] || SHIP_NAMES_MAPPING[option] || option}
+					</Button>
+				))}
+				<Divider />
+				{ClearButton}
+			</Paper>
+		);
 	};
 
 	return (
@@ -401,72 +381,67 @@ const DynamicViewingGraph = () => {
 					Filters
 				</AccordionSummary>
 				<AccordionDetails>
-					<Box>
-						<Typography>Select which price option to view in graph.</Typography>
-						<ToggleButtonGroup
-							color="primary"
-							value={filters.focusOption}
-							exclusive
-							onChange={handleChange('focusOption')}
-							aria-label="Platform"
-						>
-							{FOCUS_OPTIONS.map((option) => (
-								<ToggleButton key={option} value={option} aria-label={option}>
-									{FOCUS_OPTIONS_NAME_MAPPING[option]}
-								</ToggleButton>
-							))}
-						</ToggleButtonGroup>
-					</Box>
-					<Box>
-						<Typography sx={{ mt: 3 }}>Select how you want the data to be grouped.</Typography>
-						<ToggleButtonGroup
-							color="primary"
-							value={filters.groupBy}
-							exclusive
-							onChange={handleChange('groupBy')}
-							aria-label="Platform"
-						>
-							{GROUP_BY_OPTIONS.map((option) => (
-								<ToggleButton key={option} value={option} aria-label={option}>
-									{GROUP_OPTIONS_NAME_MAPPING[option]}
-								</ToggleButton>
-							))}
-						</ToggleButtonGroup>
-					</Box>
-					{filters.groupBy !== 'collectionDate' && (
-						<Box>
-							<Typography sx={{ mt: 3 }}>Select How to calculate grouped numbers.</Typography>
-							<ToggleButtonGroup
-								color="primary"
-								value={filters.groupCalculationFocus}
-								exclusive
-								onChange={handleChange('groupCalculationFocus')}
-								aria-label="Platform"
-							>
-								{X_AXIS_OPTIONS_VARIATIONS.map((option) => (
-									<ToggleButton key={option} value={option} aria-label={option}>
-										{option}
-									</ToggleButton>
-								))}
-							</ToggleButtonGroup>
-						</Box>
-					)}
-					<Box>
-						<Typography sx={{ mt: 3 }}>Select Filters to apply.</Typography>
-						{renderFilteringOptions()}
-					</Box>
-					<Box>
-						<Button
-							sx={{ mt: 3 }}
-							variant="contained"
-							color="primary"
-							onClick={() => {
-								setFilters(DEFAULT_FILTERS);
-							}}
-						>
-							Reset Filters
-						</Button>
-					</Box>
+					<Accordion>
+						<AccordionSummary expandIcon={<ExpandMoreIcon />}>Filter the Data</AccordionSummary>
+						<AccordionDetails>
+							{Object.keys(availableFilters?.filters).map((key) => {
+								const options = availableFilters?.filters[key];
+								return renderFilteringOptionGroup({
+									options,
+									selected: filters[key],
+									property: key,
+									available: visibleFilters[key],
+									onClick: handleArrayChange(key),
+								});
+							})}
+						</AccordionDetails>
+					</Accordion>
+					<Accordion>
+						<AccordionSummary expandIcon={<ExpandMoreIcon />}>X Axis Groupings</AccordionSummary>
+						<AccordionDetails>
+							{availableFilters?.groupings?.xAxis &&
+								renderFilteringOptionGroup({
+									options: availableFilters?.groupings?.xAxis,
+									selected: filters.groupBy,
+									property: 'groupBy',
+									onClick: handleArrayChange('groupBy', true),
+								})}
+						</AccordionDetails>
+					</Accordion>
+					<Accordion>
+						<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+							Line Groupings (Not Working)
+						</AccordionSummary>
+						<AccordionDetails>
+							{Object.keys(availableFilters?.groupings?.lines || {}).map((key) => {
+								const options = availableFilters?.groupings?.lines[key];
+								return renderFilteringOptionGroup({
+									options,
+									selected: filters[key],
+									property: key,
+									available: visibleFilters[key],
+									onClick: handleArrayChange(key),
+								});
+							})}
+						</AccordionDetails>
+					</Accordion>
+					<Accordion>
+						<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+							Calculating grouped point values
+						</AccordionSummary>
+						<AccordionDetails>
+							{Object.keys(availableFilters?.groupings?.perPoint || {}).map((key) => {
+								const options = availableFilters?.groupings?.perPoint[key];
+								return renderFilteringOptionGroup({
+									options,
+									selected: filters[key],
+									property: key,
+									available: visibleFilters[key],
+									onClick: handleArrayChange(key, true),
+								});
+							})}
+						</AccordionDetails>
+					</Accordion>
 				</AccordionDetails>
 			</Accordion>
 			<Divider />
