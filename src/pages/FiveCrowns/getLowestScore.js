@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { uniqWith, isEqual } from 'lodash';
 // Calcualte points of all cards in a hand
 const calculatePoints = (hand, wildNumber) => {
 	return hand.reduce((acc, card) => {
@@ -68,7 +68,7 @@ const findAllPossibleSets = (cardsToMatch = [], allOtherCards, wildNumber) => {
 			possibleOtherMatchingSets.push(...otherMatches);
 		}
 	}
-	return _.uniqWith(possibleOtherMatchingSets, _.isEqual);
+	return uniqWith(possibleOtherMatchingSets, isEqual);
 };
 
 /**
@@ -142,7 +142,7 @@ const findAllPossibleRuns = (cardsInCurrentRun = [], otherCards, wildNumber) => 
 			}
 		}
 	}
-	return _.uniqWith(possibleOtherMatchingSets, _.isEqual);
+	return uniqWith(possibleOtherMatchingSets, isEqual);
 };
 
 const takeOutCardsFromHand = (hand, cardsToTakeOut) => {

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { shuffle } from 'lodash';
 const suits = ['hearts', 'spades', 'clubs', 'diamonds', 'stars', 'suns', 'moons', 'clovers'];
 const defaultSuits = suits.slice(0, 4);
 const defaultValues = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -37,7 +37,7 @@ const genenerateDeck = (suits = defaultSuits, values = defaultValues, numberOfJo
 		}
 	}
 
-	return _.shuffle(deck);
+	return shuffle(deck);
 };
 
 export { genenerateDeck, suits };

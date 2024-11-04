@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import {
 	Box,
 	Button,
 	Paper,
 	Typography,
-	Stack,
 	Divider,
 	ToggleButtonGroup,
 	ToggleButton,
@@ -19,12 +18,12 @@ import {
 import './styles.css';
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { LineChart } from '@mui/x-charts/LineChart';
 import { DatePicker } from '@mui/x-date-pickers';
 import PropTypes from 'prop-types';
 import { style } from '#/components/styledComponents.jsx';
 import { mapShipNames, fetchGraphData, SHIP_NAMES_MAPPING } from '#/pages/Cruise/cruiseUtils.js';
 import { fetchFilterData } from '../cruiseUtils.js';
+import CustomLineWrapper from '../components/CustomLineWrapper.jsx';
 
 const FILTERING_OPTIONS_NAME_MAPPING = {
 	cruise: 'Cruise',
@@ -42,50 +41,6 @@ const DEFAULT_FILTERS = {
 };
 
 const minDistance = 500;
-
-class CustomLineWrapper extends React.Component {
-	shouldComponentUpdate(nextProps) {
-		if (
-			!_.isEqual(this.props.xLabels, nextProps.xLabels) ||
-			!_.isEqual(this.props.sliderValues, nextProps.sliderValues) ||
-			!_.isEqual(this.props.series, nextProps.series)
-		) {
-			return true;
-		}
-		return false;
-	}
-
-	render() {
-		return (
-			<Stack direction="row" spacing={2}>
-				<LineChart
-					xAxis={[{ scaleType: 'point', data: this.props.xLabels }]}
-					yAxis={[
-						{
-							scaleType: 'linear',
-							min: this.props.sliderValues[0],
-							max: this.props.sliderValues[1],
-						},
-					]}
-					series={this.props.series}
-					height={400}
-					margin={{ top: 10, bottom: 20 }}
-					tooltip={{ trigger: 'item' }}
-					slotProps={{ legend: { hidden: true } }}
-					onMarkClick={this.props.handleMarkClick}
-					skipAnimation
-				/>
-			</Stack>
-		);
-	}
-}
-
-CustomLineWrapper.propTypes = {
-	handleMarkClick: PropTypes.func.isRequired,
-	xLabels: PropTypes.array.isRequired,
-	sliderValues: PropTypes.array.isRequired,
-	series: PropTypes.array.isRequired,
-};
 
 // todo: when clicking on a line in the graph, allow to focus, or hide line
 // Also add a button to show all lines again
@@ -115,7 +70,7 @@ const DynamicViewingGraph = () => {
 	const fetchData = async (override) => {
 		if (loading && !override) return;
 		setLoading(true);
-		let cleanedFilters = _.cloneDeep(filters);
+		let cleanedFilters = cloneDeep(filters);
 		console.log('BBBB cleanedFilters BEFORE: ', cleanedFilters);
 		Object.keys(cleanedFilters).forEach((key) => {
 			if (cleanedFilters[key]?.length === 0 || !cleanedFilters[key]) {

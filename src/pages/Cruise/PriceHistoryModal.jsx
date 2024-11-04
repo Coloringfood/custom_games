@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { LineChart } from '@mui/x-charts/LineChart';
 import PropTypes from 'prop-types';
 import { style, ButtonWrapper } from '#/components/styledComponents.jsx';
-import _ from 'lodash';
+import { get } from 'lodash';
 import { mapShipNames } from '#/pages/Cruise/cruiseUtils.js';
 
 const paginationModel = { page: 0, pageSize: 3 };
@@ -41,7 +41,7 @@ function GameModal({ cruise = {}, setModalOpen, modalOpen }) {
 	const [xLabels, setXLabels] = useState([]);
 
 	useEffect(() => {
-		if (!_.get(cruise, 'priceHistory', false)) {
+		if (!get(cruise, 'priceHistory', false)) {
 			setSeries([]);
 			setXLabels([]);
 			return;
@@ -78,15 +78,15 @@ function GameModal({ cruise = {}, setModalOpen, modalOpen }) {
 		>
 			<Box sx={{ ...style, width: 800 }}>
 				<Typography id="modal-modal-title" variant="h6" component="h2">
-					Viewing Cruise: {_.get(cruise, 'cruiseName', 'Unknown')}
+					Viewing Cruise: {get(cruise, 'cruiseName', 'Unknown')}
 				</Typography>
 				<Typography d="modal-modal-description" sx={{ mt: 2 }}>
-					Lowest price: {_.get(cruise, 'cheapestPrice', 'Unknown')}
+					Lowest price: {get(cruise, 'cheapestPrice', 'Unknown')}
 				</Typography>
 				<Divider />
 				<Paper>
 					<DataGrid
-						rows={_.get(cruise, 'priceHistory', [])}
+						rows={get(cruise, 'priceHistory', [])}
 						columns={flatDataColumns}
 						initialState={initialState}
 						pageSizeOptions={[3, 5, 10, 30, 50, 100]}
