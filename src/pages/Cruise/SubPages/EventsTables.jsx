@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { initialState, dateStringModifiers, flatDataColumns } from '#/pages/Cruise/cruiseUtils.js';
 import PropTypes from 'prop-types';
 
-class EventsGraph extends React.PureComponent {
+class EventsTables extends React.PureComponent {
 	lazyLoadCurrentCount = 5;
 	addLazyLoadCurrentCount = () => {
 		this.lazyLoadCurrentCount += 5;
@@ -41,9 +41,9 @@ class EventsGraph extends React.PureComponent {
 	}
 }
 
-EventsGraph.propTypes = {
+EventsTables.propTypes = {
 	pulledEvents: PropTypes.array.isRequired,
 	data: PropTypes.array.isRequired,
 };
 
-export default EventsGraph;
+export default EventsTables;

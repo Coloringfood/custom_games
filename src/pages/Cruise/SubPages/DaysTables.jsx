@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { initialState } from '#/pages/Cruise/cruiseUtils.js';
 import PropTypes from 'prop-types';
 
-class DaysGraph extends React.PureComponent {
+class DaysTables extends React.PureComponent {
 	lazyLoadCurrentCount = 5;
 	addLazyLoadCurrentCount = () => {
 		this.lazyLoadCurrentCount += 5;
@@ -38,9 +38,9 @@ class DaysGraph extends React.PureComponent {
 	}
 }
 
-DaysGraph.propTypes = {
+DaysTables.propTypes = {
 	pulledDays: PropTypes.array.isRequired,
 	flatDataColumns: PropTypes.array.isRequired,
 };
 
-export default DaysGraph;
+export default DaysTables;

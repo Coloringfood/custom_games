@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { mapShipNames } from '#/pages/Cruise/cruiseUtils.js';
 import PropTypes from 'prop-types';
 
-class CruiseGraph extends React.PureComponent {
+class CruiseTables extends React.PureComponent {
 	render() {
 		return (
 			<Paper>
@@ -63,9 +63,9 @@ class CruiseGraph extends React.PureComponent {
 	}
 }
 
-CruiseGraph.propTypes = {
+CruiseTables.propTypes = {
 	showPriceHistoryModal: PropTypes.func.isRequired,
 	cruiseData: PropTypes.array.isRequired,
 };
 
-export default CruiseGraph;
+export default CruiseTables;

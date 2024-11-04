@@ -10,16 +10,20 @@ import {
 	fetchCruiseData,
 	fetchTodaysBest,
 } from '#/pages/Cruise/cruiseUtils.js';
-import DaysGraph from '#/pages/Cruise/SubPages/DaysGraph.jsx';
-import EventsGraph from '#/pages/Cruise/SubPages/EventsGraph.jsx';
-import CruiseGraph from '#/pages/Cruise/SubPages/CruiseGraph.jsx';
+import DaysTables from '#/pages/Cruise/SubPages/DaysTables.jsx';
+import EventsTables from '#/pages/Cruise/SubPages/EventsTables.jsx';
+import CruiseTables from '#/pages/Cruise/SubPages/CruiseTables.jsx';
 
 const DisplayOptions = ['days', 'events', 'cruise', 'graph'];
 
 function Default() {
 	const [loading, setLoading] = useState(false);
 	const [data, setData] = useState([]);
-	const [viewing, setViewing] = useState('graph');
+	const [viewing, setViewing] = useState(() => {
+		const params = new URLSearchParams(window.location.search);
+		const viewParam = params.get('viewing');
+		return DisplayOptions.includes(viewParam) ? viewParam : 'graph';
+	});
 	const [pulledDays, setPulledDays] = useState([]);
 	const [pulledEvents, setPulledEvents] = useState([]);
 	const [cruiseData, setCruiseData] = useState([]);
@@ -65,12 +69,12 @@ function Default() {
 	const renderViewingGraphs = () => {
 		switch (viewing) {
 			case 'days':
-				return <DaysGraph pulledDays={pulledDays} flatDataColumns={flatDataColumns} />;
+				return <DaysTables pulledDays={pulledDays} flatDataColumns={flatDataColumns} />;
 			case 'events':
-				return <EventsGraph pulledEvents={pulledEvents} data={data} />;
+				return <EventsTables pulledEvents={pulledEvents} data={data} />;
 			case 'cruise':
 				return (
-					<CruiseGraph cruiseData={cruiseData} showPriceHistoryModal={showPriceHistoryModal} />
+					<CruiseTables cruiseData={cruiseData} showPriceHistoryModal={showPriceHistoryModal} />
 				);
 			case 'graph':
 				return (
