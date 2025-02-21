@@ -24,8 +24,8 @@ class CustomLineWrapper extends React.Component {
 					yAxis={[
 						{
 							scaleType: 'linear',
-							min: this.props.sliderValues[0],
-							max: this.props.sliderValues[1],
+							min: this.props.sliderValues[0] - this.props.sliderBuffer,
+							max: this.props.sliderValues[1] + this.props.sliderBuffer,
 						},
 					]}
 					series={this.props.series}
@@ -42,11 +42,17 @@ class CustomLineWrapper extends React.Component {
 	}
 }
 
+CustomLineWrapper.defaultProps = {
+	sliderValues: [],
+	sliderBuffer: 100,
+};
+
 CustomLineWrapper.propTypes = {
 	handleMarkClick: PropTypes.func.isRequired,
 	handleLineClick: PropTypes.func,
 	xLabels: PropTypes.array.isRequired,
-	sliderValues: PropTypes.array.isRequired,
+	sliderValues: PropTypes.array,
+	sliderBuffer: PropTypes.number,
 	series: PropTypes.array.isRequired,
 };
 

@@ -12,9 +12,10 @@ import {
 } from '#/pages/Cruise/cruiseUtils.js';
 import DaysTables from '#/pages/Cruise/SubPages/DaysTables.jsx';
 import EventsTables from '#/pages/Cruise/SubPages/EventsTables.jsx';
+import EventsGraph from '#/pages/Cruise/SubPages/EventsGraph.jsx';
 import CruiseTables from '#/pages/Cruise/SubPages/CruiseTables.jsx';
 
-const DisplayOptions = ['days', 'events', 'cruise', 'graph'];
+const DisplayOptions = ['days', 'events', 'cruise', 'graph', 'eventGraph'];
 
 function Default() {
 	const [loading, setLoading] = useState(false);
@@ -31,16 +32,13 @@ function Default() {
 	const [modalCruise, setModalCruise] = useState(null);
 	const [todaysTop, setTodaysTop] = useState('');
 
-	// on page load get data from API
-	useEffect(() => {
-		(async () => {
-			if (loading) return;
-			setLoading(true);
-			const newData = await fetchCruiseData({ flat: true });
-			setData(newData);
-			setLoading(false);
-		})();
-	}, []);
+	const loadGraphData = async () => {
+		if (loading || data.length) return;
+		setLoading(true);
+		const newData = await fetchCruiseData({ flat: true });
+		setData(newData);
+		setLoading(false);
+	};
 
 	// whenever data updates, pull out parsed data
 	useEffect(() => {
@@ -69,22 +67,20 @@ function Default() {
 	const renderViewingGraphs = () => {
 		switch (viewing) {
 			case 'days':
+				loadGraphData();
 				return <DaysTables pulledDays={pulledDays} flatDataColumns={flatDataColumns} />;
 			case 'events':
+				loadGraphData();
 				return <EventsTables pulledEvents={pulledEvents} data={data} />;
 			case 'cruise':
+				loadGraphData();
 				return (
 					<CruiseTables cruiseData={cruiseData} showPriceHistoryModal={showPriceHistoryModal} />
 				);
+			case 'eventGraph':
+				return <EventsGraph />;
 			case 'graph':
-				return (
-					<DynamicViewingGraph
-						data={data}
-						pulledCruises={cruiseData}
-						pulledDays={pulledDays}
-						pulledEvents={pulledEvents}
-					/>
-				);
+				return <DynamicViewingGraph />;
 			default:
 				return null;
 		}

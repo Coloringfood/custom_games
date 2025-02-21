@@ -12,6 +12,16 @@ export const fetchCruiseData = async (filters) => {
 		});
 };
 
+export const fetchEventsGraph = async (zoomLevel) => {
+	const url = new URL(BASE_URL + '/getEventsGraph');
+	url.search = new URLSearchParams({ zoomLevel }).toString();
+	return fetch(url)
+		.then((res) => res.json())
+		.then((response) => {
+			return response.data || {};
+		});
+};
+
 export const fetchFilterData = async () => {
 	const url = new URL(BASE_URL + '/filters');
 	return fetch(url)
