@@ -40,8 +40,6 @@ const DEFAULT_FILTERS = {
 	focusOption: 'cheapestPrice',
 };
 
-const minDistance = 500;
-
 // todo: when clicking on a line in the graph, allow to focus, or hide line
 // Also add a button to show all lines again
 
@@ -98,7 +96,7 @@ const DynamicViewingGraph = () => {
 			setSeries(response.graphData?.series);
 			setXLabels(response.graphData?.xlabels);
 			setVisibleFilters(response.filterOptions);
-			setSliderValues([response.graphData?.min - 1000, response.graphData?.max + 1000]);
+			setSliderValues([response.graphData?.min, response.graphData?.max]);
 		} catch (error) {
 			console.error('Error getting entries:', error);
 		}
@@ -432,6 +430,7 @@ const DynamicViewingGraph = () => {
 				<CustomLineWrapper
 					xLabels={xLabels}
 					sliderValues={sliderValues}
+					sliderBuffer={1000}
 					handleMarkClick={handleMarkClick}
 					series={series}
 				/>
