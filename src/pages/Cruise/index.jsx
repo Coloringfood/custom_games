@@ -14,8 +14,9 @@ import DaysTables from '#/pages/Cruise/SubPages/DaysTables.jsx';
 import EventsTables from '#/pages/Cruise/SubPages/EventsTables.jsx';
 import EventsGraph from '#/pages/Cruise/SubPages/EventsGraph.jsx';
 import CruiseTables from '#/pages/Cruise/SubPages/CruiseTables.jsx';
+import LLMQuery from '#/pages/Cruise/SubPages/LLMQuery.jsx';
 
-const DisplayOptions = ['days', 'events', 'cruise', 'graph', 'eventGraph'];
+const DisplayOptions = ['query', 'days', 'events', 'cruise', 'graph', 'eventGraph'];
 
 function Default() {
 	const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ function Default() {
 	const [viewing, setViewing] = useState(() => {
 		const params = new URLSearchParams(window.location.search);
 		const viewParam = params.get('viewing');
-		return DisplayOptions.includes(viewParam) ? viewParam : 'graph';
+		return DisplayOptions.includes(viewParam) ? viewParam : 'query';
 	});
 	const [pulledDays, setPulledDays] = useState([]);
 	const [pulledEvents, setPulledEvents] = useState([]);
@@ -66,6 +67,8 @@ function Default() {
 
 	const renderViewingGraphs = () => {
 		switch (viewing) {
+			case 'query':
+				return <LLMQuery />;
 			case 'days':
 				loadGraphData();
 				return <DaysTables pulledDays={pulledDays} flatDataColumns={flatDataColumns} />;

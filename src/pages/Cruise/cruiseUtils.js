@@ -1,7 +1,45 @@
+/* global process */
 let BASE_URL = 'http://api.timaeustech.com/cruise';
 if (process.env.NODE_ENV === 'development') {
 	BASE_URL = 'http://localhost:3000/cruise';
 }
+
+export const fetchLLMQuery = async (query) => {
+	const url = new URL(BASE_URL + '/query');
+	const options = {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ question: query }),
+	};
+	return fetch(url, options)
+		.then((res) => res.json())
+		.then((response) => {
+			if (!response.data) {
+				return {};
+			}
+			return {
+				data: response.data,
+			};
+		});
+};
+
+export const getLLMQuerySuggestions = async (input) => {
+	const url = new URL(BASE_URL + '/querySuggestions');
+	url.search = new URLSearchParams({ input }).toString();
+	return fetch(url)
+		.then((res) => res.json())
+		.then((response) => {
+			if (!response.data) {
+				return [];
+			}
+			return response.data;
+		})
+		.catch((error) => {
+			console.error('Error fetching LLM query suggestions:', error);
+			return [];
+		});
+};
+
 export const fetchCruiseData = async (filters) => {
 	const url = new URL(BASE_URL);
 	if (filters && Object.keys(filters).length > 0) {
