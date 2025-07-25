@@ -1,11 +1,11 @@
 /* global process */
-let BASE_URL = 'http://api.timaeustech.com/cruise';
+let BASE_URL = 'https://api.timaeustech.com/cruise';
 if (process.env.NODE_ENV === 'development') {
 	BASE_URL = 'http://localhost:3000/cruise';
 }
 
 export const fetchLLMQuery = async (query) => {
-	const url = new URL(BASE_URL + '/query');
+	const url = new URL(BASE_URL + '/query/tooling');
 	const options = {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -60,6 +60,15 @@ export const fetchEventsGraph = async (zoomLevel) => {
 		.then((response) => {
 			return response.data || {};
 		});
+};
+
+// Fetch paginated cruise report summaries
+export const fetchCruiseReportSummary = async ({ page = 1, limit = 10 } = {}) => {
+	const url = new URL(BASE_URL + '/report-summary');
+	url.search = new URLSearchParams({ page, limit }).toString();
+	return fetch(url)
+		.then((res) => res.json())
+		.then((body) => body || { data: [], total: 0 });
 };
 
 export const fetchFilterData = async () => {

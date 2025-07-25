@@ -1,6 +1,10 @@
 import React from 'react';
 import { Button, Paper } from '@mui/material';
-import { fetchLLMQuery, getLLMQuerySuggestions } from '#/pages/Cruise/cruiseUtils.js';
+import {
+	fetchLLMQuery,
+	getLLMQuerySuggestions,
+	fetchCruiseReportSummary,
+} from '#/pages/Cruise/cruiseUtils.js';
 import ReactMarkdown from 'react-markdown';
 
 const LOCAL_STORAGE_KEY = 'llm_query_history';
@@ -9,16 +13,34 @@ class LLMQuery extends React.PureComponent {
 	state = {
 		question: '',
 		answer: '',
+		lastAskedQuestion: '',
 		loading: false,
 		error: null,
 		suggestions: [],
 		showSuggestions: false,
 		selectedSuggestion: -1,
+		lastCrawled: {},
 	};
 
 	componentDidMount() {
 		this.loadCachedQuestions();
+		this.fetchLastCrawledDate();
 	}
+
+	fetchLastCrawledDate = async () => {
+		try {
+			const response = await fetchCruiseReportSummary({ limit: 1 });
+			if (response?.summaries?.[0]?.timestamp) {
+				const lastCrawl = {
+					timestamp: new Date(response.summaries[0].timestamp).toLocaleString(),
+					cruiseCount: response.summaries[0].cruiseCount || 0,
+				};
+				this.setState({ lastCrawled: lastCrawl });
+			}
+		} catch (err) {
+			console.error('Error fetching last crawled date:', err);
+		}
+	};
 
 	loadCachedQuestions = () => {
 		const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -35,13 +57,22 @@ class LLMQuery extends React.PureComponent {
 		}
 	};
 
-	handleInputChange = async (e) => {
+	debounceTimer = null;
+
+	handleInputChange = (e) => {
 		const value = e.target.value;
 		this.setState({ question: value, showSuggestions: !!value, selectedSuggestion: -1 });
+		if (this.debounceTimer) clearTimeout(this.debounceTimer);
 		if (!value.trim()) {
 			this.setState({ suggestions: [] });
 			return;
 		}
+		this.debounceTimer = setTimeout(() => {
+			this.fetchSuggestions(value);
+		}, 1000);
+	};
+
+	fetchSuggestions = async (value) => {
 		let suggestions = [];
 		try {
 			const apiSuggestions = await getLLMQuerySuggestions(value);
@@ -105,7 +136,13 @@ class LLMQuery extends React.PureComponent {
 	handleSubmit = async () => {
 		const { question } = this.state;
 		if (!question.trim()) return;
-		this.setState({ loading: true, answer: '', error: null, showSuggestions: false });
+		this.setState({
+			loading: true,
+			answer: '',
+			error: null,
+			showSuggestions: false,
+			lastAskedQuestion: question,
+		});
 		try {
 			const res = await fetchLLMQuery(question);
 			console.log('LLM Query Response:', res);
@@ -124,6 +161,11 @@ class LLMQuery extends React.PureComponent {
 		return (
 			<Paper sx={{ p: 2, position: 'relative' }}>
 				<div style={{ position: 'relative', display: 'inline-block', width: '80%' }}>
+					<div className="cruise-query-latest">
+						<strong>Latest crawled date:</strong> {this.state.lastCrawled.timestamp || 'None'} (
+						{this.state.lastCrawled.cruiseCount || 0} entries) <br />
+						<br />
+					</div>
 					<input
 						type="text"
 						value={question}
@@ -180,6 +222,11 @@ class LLMQuery extends React.PureComponent {
 					{error && <div style={{ color: 'red' }}>{error}</div>}
 					{answer && (
 						<div style={{ textAlign: 'left' }}>
+							<strong>Question:</strong>
+							<br />
+							{this.state.lastAskedQuestion}
+							<br />
+							<br />
 							<strong>Answer:</strong> <ReactMarkdown>{answer}</ReactMarkdown>
 						</div>
 					)}
