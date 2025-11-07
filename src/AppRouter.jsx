@@ -33,6 +33,7 @@ import Sudoku from '#/pages/Sudoku/index.jsx';
 import Test from '#/pages/Test/index.jsx';
 import Cruise from '#/pages/Cruise/index.jsx';
 import Quilting from '#/pages/Quilting/index.jsx';
+import WhoDidItLast from '#/pages/WhoDidItLast/index.jsx';
 
 // Styled Components
 const StyledNav = styled(NavLink)`
@@ -100,6 +101,9 @@ const AppRouter = () => {
 					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
 						<StyledNav to="/scorer">Tools</StyledNav>
 					</Typography>
+					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+						<StyledNav to="/who">Trackers</StyledNav>
+					</Typography>
 					{user && [
 						<Typography variant="h6" component="div" sx={{ flexGrow: 1 }} key={'Secured_games'}>
 							<StyledNav to="/games">Games</StyledNav>
@@ -165,6 +169,7 @@ const AppRouter = () => {
 					<Route path="/test" element={<Test />} />
 					<Route path="/cruise" element={<Cruise />} />
 					<Route path="/quilting" element={<Quilting />} />
+					<Route path="/who" element={<WhoDidItLast />} />
 					<Route
 						path="/profile"
 						element={
