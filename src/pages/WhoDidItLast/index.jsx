@@ -26,12 +26,79 @@ import EditIcon from '@mui/icons-material/Edit';
 const STORAGE_KEY = 'who_records_v1';
 const PART_KEY = 'who_participants_v1';
 
-function formatTimestamp(ts) {
-	try {
-		return new Date(ts).toLocaleString();
-	} catch (e) {
-		return String(ts);
+// function formatTimestamp(ts) {
+// 	try {
+// 		return new Date(ts).toLocaleString();
+// 	} catch (e) {
+// 		return String(ts);
+// 	}
+// }
+
+function groupHistory(history) {
+	if (!history || history.length === 0) return [];
+
+	// Count entries per date
+	const counts = {};
+	history.forEach((h) => {
+		const d = new Date(h.timestamp);
+		const key = d.toISOString().split('T')[0]; // YYYY-MM-DD
+		counts[key] = (counts[key] || 0) + 1;
+	});
+
+	const multiplePerDay = Object.values(counts).some((c) => c > 1);
+
+	// GROUP MODE A: Human-friendly daily mode
+	if (multiplePerDay) {
+		return Object.entries(
+			history.reduce((acc, h) => {
+				const date = new Date(h.timestamp);
+				const key = date.toISOString().split('T')[0];
+				acc[key] = acc[key] || [];
+				acc[key].push(h);
+				return acc;
+			}, {}),
+		).map(([dateKey, entries]) => ({
+			label: humanDateLabel(dateKey),
+			entries,
+		}));
 	}
+
+	// GROUP MODE B: Weekly mode
+	const weekGroups = {};
+	history.forEach((h) => {
+		const d = new Date(h.timestamp);
+		const day = d.getDay();
+		const monday = new Date(d);
+		monday.setDate(d.getDate() - ((day + 6) % 7));
+		const weekKey = monday.toISOString().split('T')[0];
+		weekGroups[weekKey] = weekGroups[weekKey] || [];
+		weekGroups[weekKey].push(h);
+	});
+
+	return Object.entries(weekGroups).map(([weekStart, entries]) => {
+		const start = new Date(weekStart);
+		const end = new Date(start);
+		end.setDate(start.getDate() + 6);
+		return {
+			label: `Week of ${start.toLocaleDateString(undefined, {
+				month: 'short',
+				day: 'numeric',
+			})} – ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`,
+			entries,
+		};
+	});
+}
+
+function humanDateLabel(dateKey) {
+	const d = new Date(dateKey + 'T00:00:00');
+	const today = new Date();
+	const yesterday = new Date();
+	yesterday.setDate(today.getDate() - 1);
+
+	if (d.toDateString() === today.toDateString()) return 'Today';
+	if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+
+	return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 export default function WhoDidItLast() {
@@ -60,7 +127,15 @@ export default function WhoDidItLast() {
 		try {
 			const raw = localStorage.getItem(STORAGE_KEY);
 			const rawP = localStorage.getItem(PART_KEY);
-			setRecords(raw ? JSON.parse(raw) : []);
+			const loaded = raw ? JSON.parse(raw) : [];
+			// Ensure every record has an orderIndex
+			loaded.forEach((r, i) => {
+				if (typeof r.orderIndex !== 'number') r.orderIndex = i + 1;
+			});
+			// Sort on load
+			loaded.sort((a, b) => a.orderIndex - b.orderIndex);
+			setRecords(loaded);
+
 			setParticipants(rawP ? JSON.parse(rawP) : []);
 		} catch (e) {
 			console.error('Failed to read storage', e);
@@ -102,6 +177,7 @@ export default function WhoDidItLast() {
 			name: name.trim(),
 			participants: recordParticipants,
 			history: [],
+			orderIndex: records.length ? Math.max(...records.map((r) => r.orderIndex)) + 1 : 1,
 		};
 
 		persistRecords([newRecord, ...records]);
@@ -374,103 +450,155 @@ export default function WhoDidItLast() {
 				)}
 
 				<Stack spacing={2}>
-					{records.map((r) => {
-						const last = (r.history && r.history[0] && r.history[0].person) || '—';
-						return (
-							<Paper key={r.id} sx={{ p: 2 }} elevation={0}>
-								<Box
-									sx={{
-										display: 'flex',
-										flexDirection: isCompact ? 'column' : 'row',
-										alignItems: isCompact ? 'stretch' : 'center',
-										justifyContent: 'space-between',
-									}}
-								>
-									<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-										<Box>
-											<Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-												{r.name}
-											</Typography>
-											<Typography variant="caption" color="text.secondary">
-												Last: {last}
-											</Typography>
-										</Box>
-										{editMode && (
+					{[...records]
+						.sort((a, b) => a.orderIndex - b.orderIndex)
+						.map((r) => {
+							const last = (r.history && r.history[0] && r.history[0].person) || '—';
+							return (
+								<Paper key={r.id} sx={{ p: 2 }} elevation={0}>
+									<Box
+										sx={{
+											display: 'flex',
+											flexDirection: isCompact ? 'column' : 'row',
+											alignItems: isCompact ? 'stretch' : 'center',
+											justifyContent: 'space-between',
+										}}
+									>
+										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
 											<Box>
-												<IconButton size="small" onClick={() => handleEditRecord(r)}>
-													<EditIcon fontSize="small" />
-												</IconButton>
-												<IconButton size="small" onClick={() => handleDeleteRecord(r.id)}>
-													<DeleteIcon fontSize="small" />
-												</IconButton>
+												<Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+													{r.name}
+												</Typography>
+												<Typography variant="caption" color="text.secondary">
+													Last: {last}
+													{r.history?.length > 0 && (
+														<>
+															{' '}
+															—{' '}
+															{new Date(r.history[0].timestamp).toLocaleString(undefined, {
+																hour: 'numeric',
+																minute: 'numeric',
+																hour12: true,
+																month: 'short',
+																day: 'numeric',
+															})}
+														</>
+													)}
+												</Typography>
+											</Box>
+											{editMode && (
+												<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+													<TextField
+														type="number"
+														size="small"
+														label="Order"
+														value={r.orderIndex}
+														onChange={(e) => {
+															const value = parseInt(e.target.value, 10);
+															if (isNaN(value)) return;
+															const next = records.map((rec) =>
+																rec.id === r.id ? { ...rec, orderIndex: value } : rec,
+															);
+															// Re-sort and persist
+															next.sort((a, b) => a.orderIndex - b.orderIndex);
+															persistRecords(next);
+														}}
+														sx={{ width: 75 }}
+													/>
+													<IconButton size="small" onClick={() => handleEditRecord(r)}>
+														<EditIcon fontSize="small" />
+													</IconButton>
+													<IconButton size="small" onClick={() => handleDeleteRecord(r.id)}>
+														<DeleteIcon fontSize="small" />
+													</IconButton>
+												</Box>
+											)}
+										</Box>
+
+										<Box sx={{ mt: isCompact ? 1 : 0 }}>
+											<Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+												{r.participants.map((p) => (
+													<Button
+														key={p}
+														variant="outlined"
+														size={isCompact ? 'small' : 'medium'}
+														onClick={() => recordAction(r.id, p)}
+													>
+														{p}
+													</Button>
+												))}
+											</Box>
+										</Box>
+									</Box>
+
+									<Box sx={{ mt: 1 }}>
+										<Button
+											size="small"
+											onClick={() => setOpenHistoryId(openHistoryId === r.id ? null : r.id)}
+										>
+											{openHistoryId === r.id ? 'Hide History' : 'Show History'}
+										</Button>
+
+										{openHistoryId === r.id && (
+											<Box sx={{ mt: 1 }}>
+												{r.history && r.history.length > 0 ? (
+													<Box sx={{ maxHeight: 250, overflowY: 'auto', pr: 1 }}>
+														{groupHistory(r.history).map((section, sIdx) => (
+															<Box key={sIdx} sx={{ mb: 2 }}>
+																<Typography variant="subtitle2" sx={{ mb: 1 }}>
+																	{section.label}
+																</Typography>
+																<List dense>
+																	{section.entries.map((h, idx) => (
+																		<React.Fragment key={h.timestamp + '_' + idx}>
+																			<ListItem
+																				secondaryAction={
+																					editMode ? (
+																						<IconButton
+																							edge="end"
+																							aria-label="delete"
+																							onClick={() => deleteHistoryEntry(r.id, idx)}
+																							size={isCompact ? 'small' : 'medium'}
+																						>
+																							<DeleteIcon
+																								fontSize={isCompact ? 'small' : 'medium'}
+																							/>
+																						</IconButton>
+																					) : null
+																				}
+																			>
+																				<ListItemText
+																					primary={h.person}
+																					secondary={new Date(h.timestamp).toLocaleString(
+																						undefined,
+																						{
+																							hour: 'numeric',
+																							minute: 'numeric',
+																							hour12: true,
+																							month: 'short',
+																							day: 'numeric',
+																						},
+																					)}
+																				/>
+																			</ListItem>
+																			<Divider component="li" />
+																		</React.Fragment>
+																	))}
+																</List>
+															</Box>
+														))}
+													</Box>
+												) : (
+													<Typography variant="body2" color="text.secondary">
+														No history yet
+													</Typography>
+												)}
 											</Box>
 										)}
 									</Box>
-
-									<Box sx={{ mt: isCompact ? 1 : 0 }}>
-										<Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-											{r.participants.map((p) => (
-												<Button
-													key={p}
-													variant="outlined"
-													size={isCompact ? 'small' : 'medium'}
-													onClick={() => recordAction(r.id, p)}
-												>
-													{p}
-												</Button>
-											))}
-										</Box>
-									</Box>
-								</Box>
-
-								<Box sx={{ mt: 1 }}>
-									<Button
-										size="small"
-										onClick={() => setOpenHistoryId(openHistoryId === r.id ? null : r.id)}
-									>
-										{openHistoryId === r.id ? 'Hide History' : 'Show History'}
-									</Button>
-
-									{openHistoryId === r.id && (
-										<Box sx={{ mt: 1 }}>
-											{r.history && r.history.length > 0 ? (
-												<List dense>
-													{r.history.map((h, idx) => (
-														<React.Fragment key={h.timestamp + '_' + idx}>
-															<ListItem
-																secondaryAction={
-																	editMode ? (
-																		<IconButton
-																			edge="end"
-																			aria-label="delete"
-																			onClick={() => deleteHistoryEntry(r.id, idx)}
-																			size={isCompact ? 'small' : 'medium'}
-																		>
-																			<DeleteIcon fontSize={isCompact ? 'small' : 'medium'} />
-																		</IconButton>
-																	) : null
-																}
-															>
-																<ListItemText
-																	primary={`${h.person}`}
-																	secondary={formatTimestamp(h.timestamp)}
-																/>
-															</ListItem>
-															<Divider component="li" />
-														</React.Fragment>
-													))}
-												</List>
-											) : (
-												<Typography variant="body2" color="text.secondary">
-													No history yet
-												</Typography>
-											)}
-										</Box>
-									)}
-								</Box>
-							</Paper>
-						);
-					})}
+								</Paper>
+							);
+						})}
 				</Stack>
 			</Box>
 		</Box>
